@@ -10,15 +10,11 @@ Automaker is an autonomous AI development studio built as an npm workspace monor
 
 ```bash
 # Development
-npm run dev                 # Interactive launcher (choose web or electron)
 npm run dev:web             # Web browser mode (localhost:3007)
-npm run dev:electron        # Desktop app mode
-npm run dev:electron:debug  # Desktop with DevTools open
 
 # Building
 npm run build               # Build web application
 npm run build:packages      # Build all shared packages (required before other builds)
-npm run build:electron      # Build desktop app for current platform
 npm run build:server        # Build server only
 
 # Testing
@@ -161,7 +157,7 @@ Use `resolveModelString()` from `@automaker/model-resolver` to convert model ali
 
 - `haiku` → `claude-haiku-4-5`
 - `sonnet` → `claude-sonnet-4-20250514`
-- `opus` → `claude-opus-4-5-20251101`
+- `opus` → `claude-opus-4-6`
 
 ## Environment Variables
 

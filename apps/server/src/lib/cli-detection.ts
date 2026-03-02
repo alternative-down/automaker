@@ -8,9 +8,6 @@ import { spawn, execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
-import { createLogger } from '@automaker/utils';
-
-const logger = createLogger('CliDetection');
 
 export interface CliInfo {
   name: string;
@@ -68,10 +65,8 @@ const CLI_CONFIGS = {
   },
   cursor: {
     name: 'Cursor CLI',
-    commands: ['cursor-agent', 'cursor'],
     versionArgs: ['--version'],
     installCommands: {
-      darwin: 'brew install cursor/cursor/cursor-agent',
       linux: 'curl -fsSL https://cursor.sh/install.sh | sh',
       win32: 'iwr https://cursor.sh/install.ps1 -UseBasicParsing | iex',
     },
@@ -86,7 +81,7 @@ export async function detectCli(
   options: CliDetectionOptions = {}
 ): Promise<CliDetectionResult> {
   const config = CLI_CONFIGS[provider];
-  const { timeout = 5000, includeWsl = false, wslDistribution } = options;
+  const { timeout = 5000 } = options;
   const issues: string[] = [];
 
   const cliInfo: CliInfo = {

@@ -16,14 +16,13 @@ import {
   GitBranch,
   Code2,
   Webhook,
+  FileCode2,
+  FileText,
 } from 'lucide-react';
 import {
   AnthropicIcon,
-  CursorIcon,
   OpenAIIcon,
-  OpenCodeIcon,
   GeminiIcon,
-  CopilotIcon,
 } from '@/components/ui/provider-icon';
 import type { SettingsViewId } from '../hooks/use-settings-view';
 
@@ -39,7 +38,6 @@ export interface NavigationGroup {
   items: NavigationItem[];
 }
 
-// Global settings organized into groups
 export const GLOBAL_NAV_GROUPS: NavigationGroup[] = [
   {
     label: 'Model & Prompts',
@@ -48,6 +46,7 @@ export const GLOBAL_NAV_GROUPS: NavigationGroup[] = [
       { id: 'model-defaults', label: 'Model Defaults', icon: Workflow },
       { id: 'worktrees', label: 'Worktrees', icon: GitBranch },
       { id: 'prompts', label: 'Prompt Customization', icon: MessageSquareText },
+      { id: 'templates', label: 'Templates', icon: FileText },
       { id: 'api-keys', label: 'API Keys', icon: Key },
       {
         id: 'providers',
@@ -55,11 +54,8 @@ export const GLOBAL_NAV_GROUPS: NavigationGroup[] = [
         icon: Bot,
         subItems: [
           { id: 'claude-provider', label: 'Claude', icon: AnthropicIcon },
-          { id: 'cursor-provider', label: 'Cursor', icon: CursorIcon },
           { id: 'codex-provider', label: 'Codex', icon: OpenAIIcon },
-          { id: 'opencode-provider', label: 'OpenCode', icon: OpenCodeIcon },
           { id: 'gemini-provider', label: 'Gemini', icon: GeminiIcon },
-          { id: 'copilot-provider', label: 'Copilot', icon: CopilotIcon },
         ],
       },
       { id: 'mcp-servers', label: 'MCP Servers', icon: Plug },
@@ -69,6 +65,7 @@ export const GLOBAL_NAV_GROUPS: NavigationGroup[] = [
     label: 'Interface',
     items: [
       { id: 'appearance', label: 'Appearance', icon: Palette },
+      { id: 'editor', label: 'File Editor', icon: FileCode2 },
       { id: 'terminal', label: 'Terminal', icon: SquareTerminal },
       { id: 'keyboard', label: 'Keyboard Shortcuts', icon: Settings2 },
       { id: 'audio', label: 'Audio', icon: Volume2 },
@@ -88,8 +85,5 @@ export const GLOBAL_NAV_GROUPS: NavigationGroup[] = [
   },
 ];
 
-// Flat list of all global nav items for backwards compatibility
 export const GLOBAL_NAV_ITEMS: NavigationItem[] = GLOBAL_NAV_GROUPS.flatMap((group) => group.items);
-
-// Legacy export for backwards compatibility
 export const NAV_ITEMS: NavigationItem[] = GLOBAL_NAV_ITEMS;

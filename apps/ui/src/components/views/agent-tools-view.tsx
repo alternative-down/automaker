@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Terminal, CheckCircle, XCircle, Play, File, Pencil, Wrench } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
-import { getElectronAPI } from '@/lib/electron';
 
 const logger = createLogger('AgentToolsView');
 
@@ -21,7 +20,7 @@ interface ToolResult {
 
 export function AgentToolsView() {
   const { currentProject } = useAppStore();
-  const api = getElectronAPI();
+  const api = getHttpApiClient();
 
   // Read File Tool State
   const [readFilePath, setReadFilePath] = useState('');

@@ -2,7 +2,6 @@ import { createRouter, createMemoryHistory, createBrowserHistory } from '@tansta
 import { routeTree } from '../routeTree.gen';
 
 // Use browser history in web mode (for e2e tests and dev), memory history in Electron
-const isElectron = typeof window !== 'undefined' && window.electronAPI !== undefined;
 const BOARD_ROUTE_PATH = '/board';
 
 const history = isElectron

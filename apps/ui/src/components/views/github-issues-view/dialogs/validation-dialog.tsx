@@ -27,7 +27,6 @@ import type {
   IssueValidationConfidence,
   IssueComplexity,
   GitHubIssue,
-} from '@/lib/electron';
 
 interface ValidationDialogProps {
   open: boolean;

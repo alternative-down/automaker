@@ -1,12 +1,11 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import type { Project } from '@/lib/electron';
 
 interface UseProjectPickerProps {
   projects: Project[];
   currentProject: Project | null;
   isProjectPickerOpen: boolean;
   setIsProjectPickerOpen: (value: boolean | ((prev: boolean) => boolean)) => void;
-  setCurrentProject: (project: Project) => void;
+  setCurrentProject: (project: Project) => void | Promise<void>;
 }
 
 export function useProjectPicker({
@@ -92,9 +91,9 @@ export function useProjectPicker({
   }, [selectedProjectIndex, isProjectPickerOpen, filteredProjects, scrollToProject]);
 
   // Handle selecting the currently highlighted project
-  const selectHighlightedProject = useCallback(() => {
+  const selectHighlightedProject = useCallback(async () => {
     if (filteredProjects.length > 0 && selectedProjectIndex < filteredProjects.length) {
-      setCurrentProject(filteredProjects[selectedProjectIndex]);
+      await setCurrentProject(filteredProjects[selectedProjectIndex]);
       setIsProjectPickerOpen(false);
     }
   }, [filteredProjects, selectedProjectIndex, setCurrentProject, setIsProjectPickerOpen]);
@@ -108,7 +107,9 @@ export function useProjectPicker({
         setIsProjectPickerOpen(false);
       } else if (event.key === 'Enter') {
         event.preventDefault();
-        selectHighlightedProject();
+        selectHighlightedProject().catch(() => {
+          /* Error already logged upstream */
+        });
       } else if (event.key === 'ArrowDown') {
         event.preventDefault();
         setSelectedProjectIndex((prev) => (prev < filteredProjects.length - 1 ? prev + 1 : prev));

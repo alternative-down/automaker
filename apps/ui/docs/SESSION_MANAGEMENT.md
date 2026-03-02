@@ -345,7 +345,6 @@ For developers integrating session management:
 ### Create Session
 
 ```typescript
-const result = await window.electronAPI.sessions.create(
   'Session Name',
   '/project/path',
   '/working/directory'
@@ -355,7 +354,6 @@ const result = await window.electronAPI.sessions.create(
 ### List Sessions
 
 ```typescript
-const { sessions } = await window.electronAPI.sessions.list(
   false // includeArchived
 );
 ```
@@ -363,20 +361,16 @@ const { sessions } = await window.electronAPI.sessions.list(
 ### Update Session
 
 ```typescript
-await window.electronAPI.sessions.update(sessionId, 'New Name', ['tag1', 'tag2']);
 ```
 
 ### Archive/Unarchive
 
 ```typescript
-await window.electronAPI.sessions.archive(sessionId);
-await window.electronAPI.sessions.unarchive(sessionId);
 ```
 
 ### Delete Session
 
 ```typescript
-await window.electronAPI.sessions.delete(sessionId);
 ```
 
 ## Future Enhancements

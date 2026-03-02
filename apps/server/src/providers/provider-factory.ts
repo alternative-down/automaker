@@ -7,24 +7,19 @@
 
 import { BaseProvider } from './base-provider.js';
 import type { InstallationStatus, ModelDefinition } from './types.js';
-import {
-  isCursorModel,
-  isCodexModel,
-  isOpencodeModel,
-  isGeminiModel,
-  isCopilotModel,
-  type ModelProvider,
-} from '@automaker/types';
+import { isCodexModel, isGeminiModel, type ModelProvider } from '@automaker/types';
 import * as fs from 'fs';
 import * as path from 'path';
+
+// Import providers directly
+import { ClaudeProvider } from './claude-provider.js';
+import { CodexProvider } from './codex-provider.js';
+import { GeminiProvider } from './gemini-provider.js';
 
 const DISCONNECTED_MARKERS: Record<string, string> = {
   claude: '.claude-disconnected',
   codex: '.codex-disconnected',
-  cursor: '.cursor-disconnected',
-  opencode: '.opencode-disconnected',
   gemini: '.gemini-disconnected',
-  copilot: '.copilot-disconnected',
 };
 
 /**
@@ -60,7 +55,7 @@ const providerRegistry = new Map<string, ProviderRegistration>();
 /**
  * Register a provider with the factory
  *
- * @param name Provider name (e.g., 'claude', 'cursor')
+ * @param name Provider name (e.g., 'claude', 'codex')
  * @param registration Provider registration config
  */
 export function registerProvider(name: string, registration: ProviderRegistration): void {
@@ -103,7 +98,7 @@ export class ProviderFactory {
   /**
    * Get the appropriate provider for a given model ID
    *
-   * @param modelId Model identifier (e.g., "claude-opus-4-5-20251101", "cursor-gpt-4o", "cursor-auto")
+   * @param modelId Model identifier (e.g., "claude-opus-4-6", "codex-gpt-4o")
    * @param options Optional settings
    * @param options.throwOnDisconnected Throw error if provider is disconnected (default: true)
    * @returns Provider instance for the model
@@ -194,7 +189,7 @@ export class ProviderFactory {
   /**
    * Get provider by name (for direct access if needed)
    *
-   * @param name Provider name (e.g., "claude", "cursor") or alias (e.g., "anthropic")
+   * @param name Provider name (e.g., "claude", "codex") or alias (e.g., "anthropic")
    * @returns Provider instance or null if not found
    */
   static getProviderByName(name: string): BaseProvider | null {
@@ -248,8 +243,8 @@ export class ProviderFactory {
         model.modelString === modelId ||
         model.id.endsWith(`-${modelId}`) ||
         model.modelString.endsWith(`-${modelId}`) ||
-        model.modelString === modelId.replace(/^(claude|cursor|codex|gemini)-/, '') ||
-        model.modelString === modelId.replace(/-(claude|cursor|codex|gemini)$/, '')
+        model.modelString === modelId.replace(/^(claude|codex|gemini)-/, '') ||
+        model.modelString === modelId.replace(/-(claude|codex|gemini)$/, '')
       ) {
         return model.supportsVision ?? true;
       }
@@ -271,14 +266,6 @@ export class ProviderFactory {
 // Provider Registrations
 // =============================================================================
 
-// Import providers for registration side-effects
-import { ClaudeProvider } from './claude-provider.js';
-import { CursorProvider } from './cursor-provider.js';
-import { CodexProvider } from './codex-provider.js';
-import { OpencodeProvider } from './opencode-provider.js';
-import { GeminiProvider } from './gemini-provider.js';
-import { CopilotProvider } from './copilot-provider.js';
-
 // Register Claude provider
 registerProvider('claude', {
   factory: () => new ClaudeProvider(),
@@ -291,13 +278,6 @@ registerProvider('claude', {
   priority: 0, // Default priority
 });
 
-// Register Cursor provider
-registerProvider('cursor', {
-  factory: () => new CursorProvider(),
-  canHandleModel: (model: string) => isCursorModel(model),
-  priority: 10, // Higher priority - check Cursor models first
-});
-
 // Register Codex provider
 registerProvider('codex', {
   factory: () => new CodexProvider(),
@@ -306,25 +286,9 @@ registerProvider('codex', {
   priority: 5, // Medium priority - check after Cursor but before Claude
 });
 
-// Register OpenCode provider
-registerProvider('opencode', {
-  factory: () => new OpencodeProvider(),
-  canHandleModel: (model: string) => isOpencodeModel(model),
-  priority: 3, // Between codex (5) and claude (0)
-});
-
 // Register Gemini provider
 registerProvider('gemini', {
   factory: () => new GeminiProvider(),
   aliases: ['google'],
   canHandleModel: (model: string) => isGeminiModel(model),
-  priority: 4, // Between opencode (3) and codex (5)
-});
-
-// Register Copilot provider (GitHub Copilot SDK)
-registerProvider('copilot', {
-  factory: () => new CopilotProvider(),
-  aliases: ['github-copilot', 'github'],
-  canHandleModel: (model: string) => isCopilotModel(model),
-  priority: 6, // High priority - check before Codex since both can handle GPT models
 });

@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Code, RefreshCw } from 'lucide-react';
@@ -43,7 +42,7 @@ export function CodeView() {
 
     setIsLoading(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.readdir(currentProject.path);
 
       if (result.success && result.entries) {
@@ -77,7 +76,7 @@ export function CodeView() {
   // Load subdirectory
   const loadSubdirectory = async (path: string): Promise<FileTreeNode[]> => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.readdir(path);
 
       if (result.success && result.entries) {
@@ -103,7 +102,7 @@ export function CodeView() {
   // Load file content
   const loadFileContent = async (path: string) => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.readFile(path);
 
       if (result.success && result.content) {

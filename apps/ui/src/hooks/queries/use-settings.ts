@@ -5,7 +5,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 import type { GlobalSettings, ProjectSettings } from '@automaker/types';
@@ -24,7 +23,7 @@ export function useGlobalSettings() {
   return useQuery({
     queryKey: queryKeys.settings.global(),
     queryFn: async (): Promise<GlobalSettings> => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }
@@ -49,7 +48,7 @@ export function useProjectSettings(projectPath: string | undefined) {
     queryKey: queryKeys.settings.project(projectPath ?? ''),
     queryFn: async (): Promise<ProjectSettings> => {
       if (!projectPath) throw new Error('No project path');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }
@@ -73,7 +72,7 @@ export function useSettingsStatus() {
   return useQuery({
     queryKey: queryKeys.settings.status(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }
@@ -93,7 +92,7 @@ export function useCredentials() {
   return useQuery({
     queryKey: queryKeys.settings.credentials(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }
@@ -122,7 +121,7 @@ export function useDiscoveredAgents(
     // Include sources in query key so different source combinations have separate caches
     queryKey: queryKeys.settings.agents(projectPath ?? '', sources),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }

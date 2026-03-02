@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, startTransition } from 'react';
 import { Plus, Bug, FolderOpen, BookOpen } from 'lucide-react';
 import { useNavigate, useLocation } from '@tanstack/react-router';
 import { cn, isMac } from '@/lib/utils';
@@ -15,8 +15,6 @@ import {
   MACOS_ELECTRON_TOP_PADDING_CLASS,
   SIDEBAR_FEATURE_FLAGS,
 } from '@/components/layout/sidebar/constants';
-import type { Project } from '@/lib/electron';
-import { getElectronAPI, isElectron } from '@/lib/electron';
 import { initializeProject, hasAppSpec, hasAutomakerDir } from '@/lib/project-init';
 import { toast } from 'sonner';
 import { CreateSpecDialog } from '@/components/views/spec-view/dialogs';
@@ -40,14 +38,12 @@ export function ProjectSwitcher() {
   const location = useLocation();
   const { hideWiki } = SIDEBAR_FEATURE_FLAGS;
   const isWikiActive = location.pathname === '/wiki';
-  const {
-    projects,
-    currentProject,
-    setCurrentProject,
-    upsertAndSetCurrentProject,
-    specCreatingForProject,
-    setSpecCreatingForProject,
-  } = useAppStore();
+  const projects = useAppStore((s) => s.projects);
+  const currentProject = useAppStore((s) => s.currentProject);
+  const setCurrentProject = useAppStore((s) => s.setCurrentProject);
+  const upsertAndSetCurrentProject = useAppStore((s) => s.upsertAndSetCurrentProject);
+  const specCreatingForProject = useAppStore((s) => s.specCreatingForProject);
+  const setSpecCreatingForProject = useAppStore((s) => s.setSpecCreatingForProject);
   const [contextMenuProject, setContextMenuProject] = useState<Project | null>(null);
   const [contextMenuPosition, setContextMenuPosition] = useState<{ x: number; y: number } | null>(
     null
@@ -103,12 +99,32 @@ export function ProjectSwitcher() {
   };
 
   const handleProjectClick = useCallback(
-    (project: Project) => {
-      setCurrentProject(project);
-      // Navigate to board view when switching projects
-      navigate({ to: '/board' });
+    async (project: Project) => {
+      if (project.id === currentProject?.id) {
+        navigate({ to: '/board' });
+        return;
+      }
+      try {
+        // Ensure .automaker directory structure exists before switching
+        await initializeProject(project.path);
+      } catch (error) {
+        console.error('Failed to initialize project during switch:', error);
+        // Continue with switch even if initialization fails -
+        // the project may already be initialized
+      }
+      // Wrap in startTransition to let React batch the project switch and
+      // navigation into a single low-priority update. Without this, the two
+      // synchronous calls fire separate renders where currentProject points
+      // to the new project but per-project state (worktrees, features) is
+      // still stale, causing a cascade of effects and store mutations that
+      // can trigger React error #185 (maximum update depth exceeded).
+      startTransition(() => {
+        setCurrentProject(project);
+        // Navigate to board view when switching projects
+        navigate({ to: '/board' });
+      });
     },
-    [setCurrentProject, navigate]
+    [currentProject?.id, setCurrentProject, navigate]
   );
 
   const handleNewProject = () => {
@@ -122,7 +138,7 @@ export function ProjectSwitcher() {
   };
 
   const handleBugReportClick = useCallback(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     api.openExternalLink('https://github.com/AutoMaker-Org/automaker/issues');
   }, []);
 
@@ -134,7 +150,7 @@ export function ProjectSwitcher() {
    * Opens the system folder selection dialog and initializes the selected project.
    */
   const handleOpenFolder = useCallback(async () => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     const result = await api.openDirectory();
 
     if (!result.canceled && result.filePaths[0]) {
@@ -199,7 +215,7 @@ export function ProjectSwitcher() {
     setShowSetupDialog(false);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.specRegeneration) {
         toast.error('Spec regeneration not available');
         setSpecCreatingForProject(null);
@@ -285,7 +301,7 @@ export function ProjectSwitcher() {
         <div
           className={cn(
             'flex flex-col items-center pb-2 px-2',
-            isMac && isElectron() ? MACOS_ELECTRON_TOP_PADDING_CLASS : 'pt-3'
+            isMac && false ? MACOS_ELECTRON_TOP_PADDING_CLASS : 'pt-3'
           )}
         >
           <button

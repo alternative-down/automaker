@@ -1,6 +1,5 @@
 import { Folder } from 'lucide-react';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
-import type { Project } from '@/lib/electron';
 
 interface DeleteProjectDialogProps {
   open: boolean;

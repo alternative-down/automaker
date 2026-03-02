@@ -133,7 +133,6 @@ Before contributing to Automaker, ensure you have the following installed on you
    ```bash
    npm run dev          # Interactive launcher - choose mode
    npm run dev:web      # Browser mode (web interface)
-   npm run dev:electron # Desktop app mode
    ```
 
 **Common development commands:**
@@ -142,7 +141,6 @@ Before contributing to Automaker, ensure you have the following installed on you
 | ------------------------ | -------------------------------- |
 | `npm run dev`            | Interactive development launcher |
 | `npm run dev:web`        | Start in browser mode            |
-| `npm run dev:electron`   | Start desktop app                |
 | `npm run build`          | Build all packages and apps      |
 | `npm run build:packages` | Build shared packages only       |
 | `npm run lint`           | Run ESLint checks                |

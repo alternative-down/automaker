@@ -13,7 +13,6 @@ import { useWorktrees } from './board-view/worktree-panel/hooks';
 import { useAutoMode } from '@/hooks/use-auto-mode';
 import { pathsEqual } from '@/lib/utils';
 import { Spinner } from '@/components/ui/spinner';
-import { getElectronAPI } from '@/lib/electron';
 import { createLogger } from '@automaker/utils/logger';
 import { toast } from 'sonner';
 import type { BacklogPlanResult } from '@automaker/types';
@@ -119,7 +118,7 @@ export function GraphViewPage() {
       }
 
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         if (!api?.worktree?.listBranches) {
           setBranchSuggestions([]);
           return;
@@ -143,7 +142,7 @@ export function GraphViewPage() {
 
   // Listen for backlog plan events (for background generation)
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.backlogPlan) {
       logger.debug('Backlog plan API not available for event subscription');
       return;
@@ -185,7 +184,7 @@ export function GraphViewPage() {
 
     let isActive = true;
     const loadSavedPlan = async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api?.backlogPlan) return;
 
       const result = await api.backlogPlan.status(currentProject.path);
@@ -314,16 +313,68 @@ export function GraphViewPage() {
   const handleAddAndStartFeature = useCallback(
     async (featureData: Parameters<typeof handleAddFeature>[0]) => {
       const featuresBeforeIds = new Set(useAppStore.getState().features.map((f) => f.id));
-      await handleAddFeature(featureData);
+      try {
+        // Create feature directly with in_progress status to avoid brief backlog flash
+        await handleAddFeature({ ...featureData, initialStatus: 'in_progress' });
+      } catch (error) {
+        logger.error('Failed to create feature:', error);
+        toast.error(
+          `Failed to create feature: ${error instanceof Error ? error.message : String(error)}`
+        );
+        return;
+      }
 
       const latestFeatures = useAppStore.getState().features;
       const newFeature = latestFeatures.find((f) => !featuresBeforeIds.has(f.id));
 
       if (newFeature) {
-        await handleStartImplementation(newFeature);
+        try {
+          await handleStartImplementation(newFeature);
+        } catch (startError) {
+          logger.error('Failed to start implementation, rolling back feature status:', startError);
+          // Rollback: revert the newly created feature back to backlog so it isn't stuck in in_progress
+          try {
+            const { updateFeature } = useAppStore.getState();
+            updateFeature(newFeature.id, { status: 'backlog' });
+            // Also persist the rollback so it survives page refresh
+            await persistFeatureUpdate(newFeature.id, { status: 'backlog' });
+            logger.info(`Rolled back feature ${newFeature.id} status to backlog`);
+          } catch (rollbackErr) {
+            logger.error('Failed to rollback feature status:', rollbackErr);
+          }
+          toast.error(
+            `Failed to start feature: ${startError instanceof Error ? startError.message : String(startError)}`
+          );
+        }
+      } else {
+        // Feature was not found in the store after creation — it may have been
+        // persisted but not yet visible in the snapshot. Attempt to locate it
+        // and roll it back so it doesn't remain stuck in 'in_progress'.
+        logger.error(
+          'Newly created feature not found in store after handleAddFeature completed. ' +
+            `Store has ${latestFeatures.length} features, expected a new entry.`
+        );
+        // Best-effort: re-read the store to find any feature still in 'in_progress'
+        // that wasn't in the original set. We must use a fresh snapshot here because
+        // latestFeatures was captured before the async gap and may not contain the new entry.
+        const freshFeatures = useAppStore.getState().features;
+        const stuckFeature = freshFeatures.find(
+          (f) => f.status === 'in_progress' && !featuresBeforeIds.has(f.id)
+        );
+        if (stuckFeature) {
+          try {
+            const { updateFeature } = useAppStore.getState();
+            updateFeature(stuckFeature.id, { status: 'backlog' });
+            await persistFeatureUpdate(stuckFeature.id, { status: 'backlog' });
+            logger.info(`Rolled back orphaned feature ${stuckFeature.id} status to backlog`);
+          } catch (rollbackErr) {
+            logger.error('Failed to rollback orphaned feature status:', rollbackErr);
+          }
+        }
+        toast.error('Feature was created but could not be started. Please try again.');
       }
     },
-    [handleAddFeature, handleStartImplementation]
+    [handleAddFeature, handleStartImplementation, persistFeatureUpdate]
   );
 
   if (!currentProject) {

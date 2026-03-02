@@ -6,7 +6,6 @@ const logger = createLogger('DescriptionImageDropZone');
 import { ImageIcon, X, FileText } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { getElectronAPI } from '@/lib/electron';
 import { getAuthenticatedImageUrl } from '@/lib/api-fetch';
 import { useAppStore, type FeatureImagePath, type FeatureTextFilePath } from '@/store/app-store';
 import {
@@ -107,7 +106,7 @@ export function DescriptionImageDropZone({
   const saveImageToTemp = useCallback(
     async (base64Data: string, filename: string, mimeType: string): Promise<string | null> => {
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         // Check if saveImageToTemp method exists
         if (!api.saveImageToTemp) {
           // Fallback path when saveImageToTemp is not available

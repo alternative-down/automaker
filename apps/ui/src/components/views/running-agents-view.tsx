@@ -9,7 +9,6 @@ import { useState, useCallback } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { Bot, Folder, RefreshCw, Square, Activity, FileText } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { getElectronAPI, type RunningAgent } from '@/lib/electron';
 import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from '@tanstack/react-router';
@@ -38,7 +37,7 @@ export function RunningAgentsView() {
 
   const handleStopAgent = useCallback(
     async (agent: RunningAgent) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       // Handle backlog plans separately - they use a different API
       const isBacklogPlan = agent.featureId.startsWith('backlog-plan:');
       if (isBacklogPlan && api.backlogPlan) {

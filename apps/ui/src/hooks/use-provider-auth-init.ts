@@ -1,18 +1,23 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { useSetupStore, type ClaudeAuthMethod, type CodexAuthMethod } from '@/store/setup-store';
+import {
+  useSetupStore,
+  type ClaudeAuthMethod,
+  type CodexAuthMethod,
+} from '@/store/setup-store';
+import type { GeminiAuthStatus } from '@automaker/types';
 import { getHttpApiClient } from '@/lib/http-api-client';
 import { createLogger } from '@automaker/utils/logger';
 
 const logger = createLogger('ProviderAuthInit');
 
 /**
- * Hook to initialize Claude and Codex authentication statuses on app startup.
- * This ensures that usage tracking information is available in the board header
- * without needing to visit the settings page first.
+ * Hook to initialize Claude, Codex, and Gemini authentication statuses on app startup.
  */
 export function useProviderAuthInit() {
-  const { setClaudeAuthStatus, setCodexAuthStatus, claudeAuthStatus, codexAuthStatus } =
-    useSetupStore();
+  const setClaudeAuthStatus = useSetupStore((s) => s.setClaudeAuthStatus);
+  const setCodexAuthStatus = useSetupStore((s) => s.setCodexAuthStatus);
+  const setGeminiCliStatus = useSetupStore((s) => s.setGeminiCliStatus);
+  const setGeminiAuthStatus = useSetupStore((s) => s.setGeminiAuthStatus);
   const initialized = useRef(false);
 
   const refreshStatuses = useCallback(async () => {
@@ -22,12 +27,7 @@ export function useProviderAuthInit() {
     try {
       const result = await api.setup.getClaudeStatus();
       if (result.success && result.auth) {
-        // Cast to extended type that includes server-added fields
-        const auth = result.auth as typeof result.auth & {
-          oauthTokenValid?: boolean;
-          apiKeyValid?: boolean;
-        };
-
+        const auth = result.auth as any;
         const validMethods: ClaudeAuthMethod[] = [
           'oauth_token_env',
           'oauth_token',
@@ -46,11 +46,7 @@ export function useProviderAuthInit() {
           authenticated: auth.authenticated,
           method,
           hasCredentialsFile: auth.hasCredentialsFile ?? false,
-          oauthTokenValid: !!(
-            auth.oauthTokenValid ||
-            auth.hasStoredOAuthToken ||
-            auth.hasEnvOAuthToken
-          ),
+          oauthTokenValid: !!(auth.oauthTokenValid || auth.hasStoredOAuthToken || auth.hasEnvOAuthToken),
           apiKeyValid: !!(auth.apiKeyValid || auth.hasStoredApiKey || auth.hasEnvApiKey),
           hasEnvOAuthToken: !!auth.hasEnvOAuthToken,
           hasEnvApiKey: !!auth.hasEnvApiKey,
@@ -65,7 +61,6 @@ export function useProviderAuthInit() {
       const result = await api.setup.getCodexStatus();
       if (result.success && result.auth) {
         const auth = result.auth;
-
         const validMethods: CodexAuthMethod[] = [
           'api_key_env',
           'api_key',
@@ -88,15 +83,64 @@ export function useProviderAuthInit() {
     } catch (error) {
       logger.error('Failed to init Codex auth status:', error);
     }
-  }, [setClaudeAuthStatus, setCodexAuthStatus]);
+
+    // 3. Gemini Auth Status
+    try {
+      const result = await api.setup.getGeminiStatus();
+      if (result.installed !== undefined || result.version !== undefined || result.path !== undefined) {
+        setGeminiCliStatus({
+          installed: result.installed ?? false,
+          version: result.version,
+          path: result.path,
+        });
+      }
+
+      if (result.success && result.auth) {
+        const auth = result.auth;
+        const validMethods: GeminiAuthStatus['method'][] = [
+          'google_login',
+          'api_key',
+          'vertex_ai',
+          'none',
+        ];
+
+        const method = validMethods.includes(auth.method as GeminiAuthStatus['method'])
+          ? (auth.method as GeminiAuthStatus['method'])
+          : ((auth.authenticated ? 'google_login' : 'none') as GeminiAuthStatus['method']);
+
+        setGeminiAuthStatus({
+          authenticated: auth.authenticated,
+          method,
+          hasApiKey: auth.hasApiKey ?? false,
+          hasEnvApiKey: auth.hasEnvApiKey ?? false,
+        });
+      } else {
+        setGeminiAuthStatus({
+          authenticated: false,
+          method: 'none',
+          hasApiKey: false,
+          hasEnvApiKey: false,
+        });
+      }
+    } catch (error) {
+      logger.error('Failed to init Gemini auth status:', error);
+      setGeminiAuthStatus({
+        authenticated: false,
+        method: 'none',
+        hasApiKey: false,
+        hasEnvApiKey: false,
+      });
+    }
+  }, [
+    setClaudeAuthStatus,
+    setCodexAuthStatus,
+    setGeminiCliStatus,
+    setGeminiAuthStatus,
+  ]);
 
   useEffect(() => {
-    // Only initialize once per session if not already set
-    if (initialized.current || (claudeAuthStatus !== null && codexAuthStatus !== null)) {
-      return;
-    }
+    if (initialized.current) return;
     initialized.current = true;
-
     void refreshStatuses();
-  }, [refreshStatuses, claudeAuthStatus, codexAuthStatus]);
+  }, [refreshStatuses]);
 }

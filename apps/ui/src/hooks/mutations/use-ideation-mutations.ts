@@ -5,7 +5,6 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { IdeaCategory, AnalysisSuggestion } from '@automaker/types';
@@ -63,7 +62,7 @@ export function useGenerateIdeationSuggestions(projectPath: string) {
     mutationFn: async (input: GenerateSuggestionsInput): Promise<GenerateSuggestionsResult> => {
       const { promptId, category, jobId, promptTitle } = input;
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.ideation?.generateSuggestions) {
         throw new Error('Ideation API not available');
       }

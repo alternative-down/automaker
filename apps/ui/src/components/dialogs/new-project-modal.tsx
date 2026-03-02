@@ -17,7 +17,6 @@ import { Badge } from '@/components/ui/badge';
 import { FolderPlus, FolderOpen, Rocket, ExternalLink, Check, Link, Folder } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { starterTemplates, type StarterTemplate } from '@/lib/templates';
-import { getElectronAPI } from '@/lib/electron';
 import { cn } from '@/lib/utils';
 import { useFileBrowser } from '@/contexts/file-browser-context';
 import { getDefaultWorkspaceDirectory, saveLastProjectDirectory } from '@/lib/workspace-config';
@@ -155,7 +154,7 @@ export function NewProjectModal({
   };
 
   const handleOpenRepo = (url: string) => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     api.openExternalLink(url);
   };
 
@@ -191,7 +190,6 @@ export function NewProjectModal({
 
   // Use platform-specific path separator
   const pathSep =
-    typeof window !== 'undefined' && window.electronAPI
       ? navigator.platform.indexOf('Win') !== -1
         ? '\\'
         : '/'

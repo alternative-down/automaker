@@ -1,6 +1,5 @@
 import { User } from 'lucide-react';
 import { Markdown } from '@/components/ui/markdown';
-import type { GitHubComment } from '@/lib/electron';
 import { formatDate } from '../utils';
 
 interface CommentItemProps {

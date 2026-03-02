@@ -6,7 +6,6 @@
  */
 
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from './electron';
 
 const logger = createLogger('ProjectInit');
 
@@ -39,7 +38,7 @@ const REQUIRED_STRUCTURE: {
  * @returns Result indicating what was created or if the project was already initialized
  */
 export async function initializeProject(projectPath: string): Promise<ProjectInitResult> {
-  const api = getElectronAPI();
+  const api = getHttpApiClient();
   const createdFiles: string[] = [];
   const existingFiles: string[] = [];
 
@@ -142,7 +141,7 @@ export async function initializeProject(projectPath: string): Promise<ProjectIni
  * @returns true if all required files/directories exist
  */
 export async function isProjectInitialized(projectPath: string): Promise<boolean> {
-  const api = getElectronAPI();
+  const api = getHttpApiClient();
 
   try {
     // Check all required directories exist (no files required - features/ folder is source of truth)
@@ -172,7 +171,7 @@ export async function getProjectInitStatus(projectPath: string): Promise<{
   missingFiles: string[];
   existingFiles: string[];
 }> {
-  const api = getElectronAPI();
+  const api = getHttpApiClient();
   const missingFiles: string[] = [];
   const existingFiles: string[] = [];
 
@@ -210,7 +209,7 @@ export async function getProjectInitStatus(projectPath: string): Promise<{
  * @returns true if app_spec.txt exists
  */
 export async function hasAppSpec(projectPath: string): Promise<boolean> {
-  const api = getElectronAPI();
+  const api = getHttpApiClient();
   try {
     const fullPath = `${projectPath}/.automaker/app_spec.txt`;
     return await api.exists(fullPath);
@@ -227,7 +226,7 @@ export async function hasAppSpec(projectPath: string): Promise<boolean> {
  * @returns true if .automaker directory exists
  */
 export async function hasAutomakerDir(projectPath: string): Promise<boolean> {
-  const api = getElectronAPI();
+  const api = getHttpApiClient();
   try {
     const fullPath = `${projectPath}/.automaker`;
     return await api.exists(fullPath);

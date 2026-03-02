@@ -3,13 +3,11 @@ import { createLogger } from '@automaker/utils/logger';
 import { useAppStore } from '@/store/app-store';
 
 const logger = createLogger('SpecGeneration');
-import { getElectronAPI } from '@/lib/electron';
 import { toast } from 'sonner';
 import { CheckCircle2 } from 'lucide-react';
 import { createElement } from 'react';
 import { SPEC_FILE_WRITE_DELAY, STATUS_CHECK_INTERVAL_MS } from '../constants';
 import type { FeatureCount } from '../types';
-import type { SpecRegenerationEvent } from '@/types/electron';
 import { useCreateSpec, useRegenerateSpec, useGenerateFeatures } from '@/hooks/mutations';
 
 interface UseSpecGenerationOptions {
@@ -85,7 +83,7 @@ export function useSpecGeneration({ loadSpec }: UseSpecGenerationOptions) {
       statusCheckRef.current = true;
 
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         if (!api.specRegeneration) {
           statusCheckRef.current = false;
           return;
@@ -148,7 +146,7 @@ export function useSpecGeneration({ loadSpec }: UseSpecGenerationOptions) {
         (isCreating || isRegenerating || isGeneratingFeatures || isSyncing)
       ) {
         try {
-          const api = getElectronAPI();
+          const api = getHttpApiClient();
           if (!api.specRegeneration) return;
 
           const status = await api.specRegeneration.status(currentProject.path);
@@ -187,7 +185,7 @@ export function useSpecGeneration({ loadSpec }: UseSpecGenerationOptions) {
 
     const intervalId = setInterval(async () => {
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         if (!api.specRegeneration) return;
 
         const status = await api.specRegeneration.status(currentProject.path);
@@ -232,7 +230,7 @@ export function useSpecGeneration({ loadSpec }: UseSpecGenerationOptions) {
   useEffect(() => {
     if (!currentProject) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.specRegeneration) return;
 
     const unsubscribe = api.specRegeneration.onEvent((event: SpecRegenerationEvent) => {
@@ -541,7 +539,7 @@ export function useSpecGeneration({ loadSpec }: UseSpecGenerationOptions) {
     setLogs('');
     logger.debug('[useSpecGeneration] Starting spec sync');
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.specRegeneration) {
         logger.error('[useSpecGeneration] Spec regeneration not available');
         setIsSyncing(false);

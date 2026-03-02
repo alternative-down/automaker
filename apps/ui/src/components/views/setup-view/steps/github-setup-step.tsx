@@ -3,7 +3,6 @@ import { createLogger } from '@automaker/utils/logger';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useSetupStore } from '@/store/setup-store';
-import { getElectronAPI } from '@/lib/electron';
 import {
   CheckCircle2,
   ArrowRight,
@@ -34,7 +33,7 @@ export function GitHubSetupStep({ onNext, onBack, onSkip }: GitHubSetupStepProps
   const checkStatus = useCallback(async () => {
     setIsChecking(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.getGhStatus) {
         return;
       }

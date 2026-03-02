@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 
 const logger = createLogger('DefaultEditor');
 
@@ -9,7 +8,7 @@ export function useDefaultEditor() {
 
   const fetchDefaultEditor = useCallback(async () => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api?.worktree?.getDefaultEditor) {
         return;
       }

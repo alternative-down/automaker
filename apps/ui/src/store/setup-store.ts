@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-// Note: persist middleware removed - settings now sync via API (use-settings-sync.ts)
+import type { GeminiAuthStatus } from '@automaker/types';
 
 // CLI Installation Status
 export interface CliStatus {
@@ -21,85 +21,11 @@ export interface GhCliStatus {
   error?: string;
 }
 
-// Cursor CLI Status
-export interface CursorCliStatus {
-  installed: boolean;
-  version?: string | null;
-  path?: string | null;
-  auth?: {
-    authenticated: boolean;
-    method: string;
-  };
-  installCommand?: string;
-  loginCommand?: string;
-  error?: string;
-}
-
-// Codex CLI Status
-export interface CodexCliStatus {
-  installed: boolean;
-  version?: string | null;
-  path?: string | null;
-  auth?: {
-    authenticated: boolean;
-    method: string;
-  };
-  installCommand?: string;
-  loginCommand?: string;
-  error?: string;
-}
-
-// OpenCode CLI Status
-export interface OpencodeCliStatus {
-  installed: boolean;
-  version?: string | null;
-  path?: string | null;
-  auth?: {
-    authenticated: boolean;
-    method: string;
-  };
-  installCommand?: string;
-  loginCommand?: string;
-  error?: string;
-}
-
-// Gemini CLI Status
-export interface GeminiCliStatus {
-  installed: boolean;
-  version?: string | null;
-  path?: string | null;
-  auth?: {
-    authenticated: boolean;
-    method: string;
-    hasApiKey?: boolean;
-    hasEnvApiKey?: boolean;
-  };
-  installCommand?: string;
-  loginCommand?: string;
-  error?: string;
-}
-
-// Copilot SDK Status
-export interface CopilotCliStatus {
-  installed: boolean;
-  version?: string | null;
-  path?: string | null;
-  auth?: {
-    authenticated: boolean;
-    method: string;
-    login?: string;
-    host?: string;
-  };
-  installCommand?: string;
-  loginCommand?: string;
-  error?: string;
-}
-
 // Codex Auth Method
 export type CodexAuthMethod =
-  | 'api_key_env' // OPENAI_API_KEY environment variable
-  | 'api_key' // Manually stored API key
-  | 'cli_authenticated' // Codex CLI is installed and authenticated
+  | 'api_key_env'
+  | 'api_key'
+  | 'cli_authenticated'
   | 'none';
 
 // Codex Auth Status
@@ -112,14 +38,16 @@ export interface CodexAuthStatus {
   error?: string;
 }
 
-// Claude Auth Method - all possible authentication sources
+export type { GeminiAuthStatus };
+
+// Claude Auth Method
 export type ClaudeAuthMethod =
   | 'oauth_token_env'
-  | 'oauth_token' // Stored OAuth token from claude login
-  | 'api_key_env' // ANTHROPIC_API_KEY environment variable
-  | 'api_key' // Manually stored API key
-  | 'credentials_file' // Generic credentials file detection
-  | 'cli_authenticated' // Claude CLI is installed and has active sessions/activity
+  | 'oauth_token'
+  | 'api_key_env'
+  | 'api_key'
+  | 'credentials_file'
+  | 'cli_authenticated'
   | 'none';
 
 // Claude Auth Status
@@ -149,87 +77,46 @@ export type SetupStep =
   | 'providers'
   | 'claude_detect'
   | 'claude_auth'
-  | 'cursor'
   | 'codex'
-  | 'opencode'
   | 'gemini'
-  | 'copilot'
   | 'github'
   | 'complete';
 
 export interface SetupState {
-  // Setup wizard state
   isFirstRun: boolean;
   setupComplete: boolean;
   currentStep: SetupStep;
-
-  // Claude CLI state
   claudeCliStatus: CliStatus | null;
   claudeAuthStatus: ClaudeAuthStatus | null;
   claudeInstallProgress: InstallProgress;
   claudeIsVerifying: boolean;
-
-  // GitHub CLI state
   ghCliStatus: GhCliStatus | null;
-
-  // Cursor CLI state
-  cursorCliStatus: CursorCliStatus | null;
-
-  // Codex CLI state
   codexCliStatus: CliStatus | null;
   codexAuthStatus: CodexAuthStatus | null;
   codexInstallProgress: InstallProgress;
-
-  // OpenCode CLI state
-  opencodeCliStatus: OpencodeCliStatus | null;
-
-  // Gemini CLI state
-  geminiCliStatus: GeminiCliStatus | null;
-
-  // Copilot SDK state
-  copilotCliStatus: CopilotCliStatus | null;
-
-  // Setup preferences
+  geminiCliStatus: CliStatus | null;
+  geminiAuthStatus: GeminiAuthStatus | null;
   skipClaudeSetup: boolean;
 }
 
 export interface SetupActions {
-  // Setup flow
   setCurrentStep: (step: SetupStep) => void;
   setSetupComplete: (complete: boolean) => void;
   completeSetup: () => void;
   resetSetup: () => void;
   setIsFirstRun: (isFirstRun: boolean) => void;
-
-  // Claude CLI
   setClaudeCliStatus: (status: CliStatus | null) => void;
   setClaudeAuthStatus: (status: ClaudeAuthStatus | null) => void;
   setClaudeInstallProgress: (progress: Partial<InstallProgress>) => void;
   resetClaudeInstallProgress: () => void;
   setClaudeIsVerifying: (isVerifying: boolean) => void;
-
-  // GitHub CLI
   setGhCliStatus: (status: GhCliStatus | null) => void;
-
-  // Cursor CLI
-  setCursorCliStatus: (status: CursorCliStatus | null) => void;
-
-  // Codex CLI
   setCodexCliStatus: (status: CliStatus | null) => void;
   setCodexAuthStatus: (status: CodexAuthStatus | null) => void;
   setCodexInstallProgress: (progress: Partial<InstallProgress>) => void;
   resetCodexInstallProgress: () => void;
-
-  // OpenCode CLI
-  setOpencodeCliStatus: (status: OpencodeCliStatus | null) => void;
-
-  // Gemini CLI
-  setGeminiCliStatus: (status: GeminiCliStatus | null) => void;
-
-  // Copilot SDK
-  setCopilotCliStatus: (status: CopilotCliStatus | null) => void;
-
-  // Preferences
+  setGeminiCliStatus: (status: CliStatus | null) => void;
+  setGeminiAuthStatus: (status: GeminiAuthStatus | null) => void;
   setSkipClaudeSetup: (skip: boolean) => void;
 }
 
@@ -240,110 +127,57 @@ const initialInstallProgress: InstallProgress = {
   output: [],
 };
 
-// Check if setup should be skipped (for E2E testing)
 const shouldSkipSetup = import.meta.env.VITE_SKIP_SETUP === 'true';
 
-const initialState: SetupState = {
-  isFirstRun: !shouldSkipSetup,
-  setupComplete: shouldSkipSetup,
-  currentStep: shouldSkipSetup ? 'complete' : 'welcome',
+function getInitialSetupComplete(): boolean {
+  if (shouldSkipSetup) return true;
+  try {
+    const raw = localStorage.getItem('automaker-settings-cache');
+    if (raw) {
+      const parsed = JSON.parse(raw) as { setupComplete?: boolean };
+      if (parsed?.setupComplete === true) return true;
+    }
+  } catch {}
+  return false;
+}
 
+const initialSetupComplete = getInitialSetupComplete();
+
+const initialState: SetupState = {
+  isFirstRun: !shouldSkipSetup && !initialSetupComplete,
+  setupComplete: initialSetupComplete,
+  currentStep: initialSetupComplete ? 'complete' : 'welcome',
   claudeCliStatus: null,
   claudeAuthStatus: null,
   claudeInstallProgress: { ...initialInstallProgress },
   claudeIsVerifying: false,
-
   ghCliStatus: null,
-  cursorCliStatus: null,
-
   codexCliStatus: null,
   codexAuthStatus: null,
   codexInstallProgress: { ...initialInstallProgress },
-
-  opencodeCliStatus: null,
-
   geminiCliStatus: null,
-
-  copilotCliStatus: null,
-
+  geminiAuthStatus: null,
   skipClaudeSetup: shouldSkipSetup,
 };
 
 export const useSetupStore = create<SetupState & SetupActions>()((set, get) => ({
   ...initialState,
-
-  // Setup flow
   setCurrentStep: (step) => set({ currentStep: step }),
-
-  setSetupComplete: (complete) =>
-    set({
-      setupComplete: complete,
-      currentStep: complete ? 'complete' : 'welcome',
-    }),
-
+  setSetupComplete: (complete) => set({ setupComplete: complete, currentStep: complete ? 'complete' : 'welcome' }),
   completeSetup: () => set({ setupComplete: true, currentStep: 'complete' }),
-
-  resetSetup: () =>
-    set({
-      ...initialState,
-      isFirstRun: false, // Don't reset first run flag
-    }),
-
+  resetSetup: () => set({ ...initialState, setupComplete: false, currentStep: 'welcome', isFirstRun: false }),
   setIsFirstRun: (isFirstRun) => set({ isFirstRun }),
-
-  // Claude CLI
   setClaudeCliStatus: (status) => set({ claudeCliStatus: status }),
-
   setClaudeAuthStatus: (status) => set({ claudeAuthStatus: status }),
-
-  setClaudeInstallProgress: (progress) =>
-    set({
-      claudeInstallProgress: {
-        ...get().claudeInstallProgress,
-        ...progress,
-      },
-    }),
-
-  resetClaudeInstallProgress: () =>
-    set({
-      claudeInstallProgress: { ...initialInstallProgress },
-    }),
-
+  setClaudeInstallProgress: (progress) => set({ claudeInstallProgress: { ...get().claudeInstallProgress, ...progress } }),
+  resetClaudeInstallProgress: () => set({ claudeInstallProgress: { ...initialInstallProgress } }),
   setClaudeIsVerifying: (isVerifying) => set({ claudeIsVerifying: isVerifying }),
-
-  // GitHub CLI
   setGhCliStatus: (status) => set({ ghCliStatus: status }),
-
-  // Cursor CLI
-  setCursorCliStatus: (status) => set({ cursorCliStatus: status }),
-
-  // Codex CLI
   setCodexCliStatus: (status) => set({ codexCliStatus: status }),
-
   setCodexAuthStatus: (status) => set({ codexAuthStatus: status }),
-
-  setCodexInstallProgress: (progress) =>
-    set({
-      codexInstallProgress: {
-        ...get().codexInstallProgress,
-        ...progress,
-      },
-    }),
-
-  resetCodexInstallProgress: () =>
-    set({
-      codexInstallProgress: { ...initialInstallProgress },
-    }),
-
-  // OpenCode CLI
-  setOpencodeCliStatus: (status) => set({ opencodeCliStatus: status }),
-
-  // Gemini CLI
+  setCodexInstallProgress: (progress) => set({ codexInstallProgress: { ...get().codexInstallProgress, ...progress } }),
+  resetCodexInstallProgress: () => set({ codexInstallProgress: { ...initialInstallProgress } }),
   setGeminiCliStatus: (status) => set({ geminiCliStatus: status }),
-
-  // Copilot SDK
-  setCopilotCliStatus: (status) => set({ copilotCliStatus: status }),
-
-  // Preferences
+  setGeminiAuthStatus: (status) => set({ geminiAuthStatus: status }),
   setSkipClaudeSetup: (skip) => set({ skipClaudeSetup: skip }),
 }));

@@ -9,20 +9,21 @@ import { getErrorMessage, logError } from '../common.js';
 export function createProvidersHandler() {
   return async (_req: Request, res: Response): Promise<void> => {
     try {
-      // Get installation status from all providers
+      // Get installation status from all providers (Claude, Codex, Gemini)
       const statuses = await ProviderFactory.checkAllProviders();
 
-      const providers: Record<string, any> = {
+      const providers: Record<string, Record<string, unknown>> = {
         anthropic: {
           available: statuses.claude?.installed || false,
           hasApiKey: !!process.env.ANTHROPIC_API_KEY,
         },
-        cursor: {
-          available: statuses.cursor?.installed || false,
-          version: statuses.cursor?.version,
-          path: statuses.cursor?.path,
-          method: statuses.cursor?.method,
-          authenticated: statuses.cursor?.authenticated,
+        codex: {
+          available: statuses.codex?.installed || false,
+          authenticated: (statuses.codex as any)?.authenticated || false,
+        },
+        gemini: {
+          available: statuses.gemini?.installed || false,
+          authenticated: (statuses.gemini as any)?.authenticated || false,
         },
       };
 

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 
 const logger = createLogger('RunningAgents');
 
@@ -11,7 +10,7 @@ export function useRunningAgents() {
   // Fetch running agents count function - used for initial load and event-driven updates
   const fetchRunningAgentsCount = useCallback(async () => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (api.runningAgents) {
         logger.debug('Fetching running agents count');
         const result = await api.runningAgents.getAll();
@@ -45,7 +44,7 @@ export function useRunningAgents() {
 
   // Subscribe to auto-mode events to update running agents count in real-time
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.autoMode) {
       logger.debug('Auto mode API not available for running agents hook');
       // If autoMode is not available, still fetch initial count
@@ -77,7 +76,7 @@ export function useRunningAgents() {
 
   // Subscribe to backlog plan events to update running agents count
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.backlogPlan) return;
 
     fetchRunningAgentsCount();
@@ -93,7 +92,7 @@ export function useRunningAgents() {
 
   // Subscribe to spec regeneration events to update running agents count
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.specRegeneration) return;
 
     fetchRunningAgentsCount();

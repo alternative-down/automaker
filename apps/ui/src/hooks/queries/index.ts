@@ -20,10 +20,11 @@ export {
   useGitHubValidations,
   useGitHubRemote,
   useGitHubIssueComments,
+  useGitHubPRReviewComments,
 } from './use-github';
 
 // Usage
-export { useClaudeUsage, useCodexUsage } from './use-usage';
+export { useClaudeUsage, useCodexUsage, useZaiUsage, useGeminiUsage } from './use-usage';
 
 // Running Agents
 export { useRunningAgents, useRunningAgentsCount } from './use-running-agents';
@@ -52,8 +53,6 @@ export {
 export {
   useAvailableModels,
   useCodexModels,
-  useOpencodeModels,
-  useOpencodeProviders,
   useModelProviders,
 } from './use-models';
 
@@ -63,10 +62,7 @@ export {
   useGitHubCliStatus,
   useApiKeysStatus,
   usePlatformInfo,
-  useCursorCliStatus,
-  useCopilotCliStatus,
   useGeminiCliStatus,
-  useOpencodeCliStatus,
 } from './use-cli-status';
 
 // Ideation
@@ -83,10 +79,6 @@ export { usePipelineConfig } from './use-pipeline';
 
 // Spec
 export { useSpecFile, useSpecRegenerationStatus } from './use-spec';
-
-// Cursor Permissions
-export { useCursorPermissionsQuery } from './use-cursor-permissions';
-export type { CursorPermissionsData } from './use-cursor-permissions';
 
 // Workspace
 export { useWorkspaceDirectories } from './use-workspace';

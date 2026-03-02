@@ -11,11 +11,9 @@
  * // Check if WSL is available
  * if (process.platform === 'win32' && isWslAvailable()) {
  *   // Find a CLI tool installed in WSL
- *   const cliPath = findCliInWsl('cursor-agent');
  *   if (cliPath) {
  *     // Create command/args for spawning via WSL
  *     const { command, args } = createWslCommand(cliPath, ['--version']);
- *     // command = 'wsl.exe', args = ['cursor-agent', '--version']
  *   }
  * }
  * ```
@@ -178,7 +176,6 @@ export function getWslDistributions(options: WslOptions = {}): string[] {
  * Searches for the CLI using 'which' inside WSL, then checks common paths.
  * If no distribution is specified, tries all available distributions (excluding docker-desktop).
  *
- * @param cliName - Name of the CLI to find (e.g., 'cursor-agent')
  * @param options - WSL options
  * @returns The Linux path to the CLI and the distribution where found, or null if not found
  */
@@ -317,9 +314,7 @@ export function execInWsl(command: string, options: WslOptions = {}): string | n
  *
  * @example
  * ```typescript
- * const { command, args } = createWslCommand('/home/user/.local/bin/cursor-agent', ['-p', 'hello']);
  * // command = 'C:\\Windows\\System32\\wsl.exe'
- * // args = ['/home/user/.local/bin/cursor-agent', '-p', 'hello']
  *
  * spawn(command, args, { stdio: ['ignore', 'pipe', 'pipe'] });
  * ```

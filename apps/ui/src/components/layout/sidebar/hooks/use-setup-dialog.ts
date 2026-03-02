@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 
 const logger = createLogger('SetupDialog');
 import { toast } from 'sonner';
@@ -40,7 +39,7 @@ export function useSetupDialog({
     setShowSetupDialog(false);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.specRegeneration) {
         toast.error('Spec regeneration not available');
         setSpecCreatingForProject(null);

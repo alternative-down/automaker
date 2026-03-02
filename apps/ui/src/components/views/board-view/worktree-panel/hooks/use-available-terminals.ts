@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 import { useAppStore } from '@/store/app-store';
 import type { TerminalInfo } from '@automaker/types';
 
@@ -16,7 +15,7 @@ export function useAvailableTerminals() {
 
   const fetchAvailableTerminals = useCallback(async () => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api?.worktree?.getAvailableTerminals) {
         setIsLoading(false);
         return;
@@ -39,7 +38,7 @@ export function useAvailableTerminals() {
   const refresh = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api?.worktree?.refreshTerminals) {
         // Fallback to regular fetch if refresh not available
         await fetchAvailableTerminals();

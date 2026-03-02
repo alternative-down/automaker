@@ -5,7 +5,6 @@ import { Database, Download, Upload } from 'lucide-react';
 import { ExportFeaturesDialog } from '../board-view/dialogs/export-features-dialog';
 import { ImportFeaturesDialog } from '../board-view/dialogs/import-features-dialog';
 import { useBoardFeatures } from '../board-view/hooks';
-import type { Project } from '@/lib/electron';
 
 interface DataManagementSectionProps {
   project: Project;

@@ -10,7 +10,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import { initializeProject } from '@/lib/project-init';
 import {
   FolderOpen,
@@ -57,7 +56,7 @@ export function WelcomeView() {
    * Kick off project analysis agent to analyze the codebase
    */
   const analyzeProject = useCallback(async (projectPath: string) => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
 
     if (!api.autoMode?.analyzeProject) {
       logger.info('[Welcome] Auto mode API not available, skipping analysis');
@@ -151,7 +150,7 @@ export function WelcomeView() {
         setShowWorkspacePicker(true);
       } else {
         // Fall back to current behavior (native dialog or manual input)
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         const result = await api.openDirectory();
 
         if (!result.canceled && result.filePaths[0]) {
@@ -164,7 +163,7 @@ export function WelcomeView() {
     } catch (error) {
       logger.error('[Welcome] Failed to check workspace config:', error);
       // Fall back to current behavior on error
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.openDirectory();
 
       if (!result.canceled && result.filePaths[0]) {
@@ -210,7 +209,7 @@ export function WelcomeView() {
   const handleCreateBlankProject = async (projectName: string, parentDir: string) => {
     setIsCreating(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const projectPath = `${parentDir}/${projectName}`;
 
       // Validate that parent directory exists
@@ -323,7 +322,7 @@ export function WelcomeView() {
     setIsCreating(true);
     try {
       const httpClient = getHttpApiClient();
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
 
       // Clone the template repository
       const cloneResult = await httpClient.templates.clone(
@@ -427,7 +426,7 @@ export function WelcomeView() {
     setIsCreating(true);
     try {
       const httpClient = getHttpApiClient();
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
 
       // Clone the repository
       const cloneResult = await httpClient.templates.clone(repoUrl, projectName, parentDir);

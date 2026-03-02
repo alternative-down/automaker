@@ -143,16 +143,12 @@ This will prompt you to choose your run mode, or you can specify a mode directly
 
 ```bash
 # Standard development mode
-npm run dev:electron
 
 # With DevTools open automatically
-npm run dev:electron:debug
 
 # For WSL (Windows Subsystem for Linux)
-npm run dev:electron:wsl
 
 # For WSL with GPU acceleration
-npm run dev:electron:wsl:gpu
 ```
 
 #### Web Browser Mode
@@ -172,8 +168,6 @@ For a user-friendly interactive menu, use the built-in TUI launcher script:
 
 # Or launch directly without menu
 ./start-automaker.sh web          # Web browser
-./start-automaker.sh electron     # Desktop app
-./start-automaker.sh electron-debug  # Desktop + DevTools
 
 # Additional options
 ./start-automaker.sh --help       # Show all available options
@@ -209,12 +203,8 @@ npm run build
 
 ```bash
 # Build for current platform (macOS/Windows/Linux)
-npm run build:electron
 
 # Platform-specific builds
-npm run build:electron:mac     # macOS (DMG + ZIP, x64 + arm64)
-npm run build:electron:win     # Windows (NSIS installer, x64)
-npm run build:electron:linux   # Linux (AppImage + DEB + RPM, x64)
 
 # Output directory: apps/ui/release/
 ```
@@ -362,6 +352,42 @@ services:
 ##### Architecture Support
 
 The Docker image supports both AMD64 and ARM64 architectures. The GitHub CLI and Claude CLI are automatically downloaded for the correct architecture during build.
+
+##### Playwright for Automated Testing
+
+The Docker image includes **Playwright Chromium pre-installed** for AI agent verification tests. When agents implement features in automated testing mode, they use Playwright to verify the implementation works correctly.
+
+**No additional setup required** - Playwright verification works out of the box.
+
+#### Optional: Persist browsers for manual updates
+
+By default, Playwright Chromium is pre-installed in the Docker image. If you need to manually update browsers or want to persist browser installations across container restarts (not image rebuilds), you can mount a volume.
+
+**Important:** When you first add this volume mount to an existing setup, the empty volume will override the pre-installed browsers. You must re-install them:
+
+```bash
+# After adding the volume mount for the first time
+docker exec --user automaker -w /app automaker-server npx playwright install chromium
+```
+
+Add this to your `docker-compose.override.yml`:
+
+```yaml
+services:
+  server:
+    volumes:
+      - playwright-cache:/home/automaker/.cache/ms-playwright
+
+volumes:
+  playwright-cache:
+    name: automaker-playwright-cache
+```
+
+**Updating browsers manually:**
+
+```bash
+docker exec --user automaker -w /app automaker-server npx playwright install chromium
+```
 
 ### Testing
 

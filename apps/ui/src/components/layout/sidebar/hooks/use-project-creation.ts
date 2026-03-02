@@ -1,12 +1,10 @@
 import { useState, useCallback } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 
 const logger = createLogger('ProjectCreation');
 import { initializeProject } from '@/lib/project-init';
 import { toast } from 'sonner';
 import type { StarterTemplate } from '@/lib/templates';
-import type { Project } from '@/lib/electron';
 
 interface UseProjectCreationProps {
   upsertAndSetCurrentProject: (path: string, name: string) => Project;
@@ -33,7 +31,7 @@ export function useProjectCreation({ upsertAndSetCurrentProject }: UseProjectCre
 
         // Write initial app_spec.txt with proper XML structure
         // Note: Must follow XML format as defined in apps/server/src/lib/app-spec-format.ts
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         await api.writeFile(
           `${projectPath}/.automaker/app_spec.txt`,
           `<project_specification>
@@ -87,7 +85,7 @@ export function useProjectCreation({ upsertAndSetCurrentProject }: UseProjectCre
     async (projectName: string, parentDir: string) => {
       setIsCreatingProject(true);
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         const projectPath = `${parentDir}/${projectName}`;
 
         // Create project directory
@@ -114,7 +112,7 @@ export function useProjectCreation({ upsertAndSetCurrentProject }: UseProjectCre
     async (template: StarterTemplate, projectName: string, parentDir: string) => {
       setIsCreatingProject(true);
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
 
         // Clone template repository
         if (!api.templates) {
@@ -183,7 +181,7 @@ export function useProjectCreation({ upsertAndSetCurrentProject }: UseProjectCre
     async (repoUrl: string, projectName: string, parentDir: string) => {
       setIsCreatingProject(true);
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
 
         // Clone custom repository
         if (!api.templates) {

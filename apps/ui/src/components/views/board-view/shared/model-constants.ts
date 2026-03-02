@@ -1,19 +1,13 @@
 import type { ModelProvider, ThinkingLevel, ReasoningEffort } from '@automaker/types';
 import {
-  CURSOR_MODEL_MAP,
   CODEX_MODEL_MAP,
-  OPENCODE_MODELS as OPENCODE_MODEL_CONFIGS,
   GEMINI_MODEL_MAP,
-  COPILOT_MODEL_MAP,
 } from '@automaker/types';
 import { Brain, Zap, Scale, Cpu, Rocket, Sparkles } from 'lucide-react';
 import {
   AnthropicIcon,
-  CursorIcon,
   OpenAIIcon,
-  OpenCodeIcon,
   GeminiIcon,
-  CopilotIcon,
 } from '@/components/ui/provider-icon';
 
 export type ModelOption = {
@@ -52,20 +46,6 @@ export const CLAUDE_MODELS: ModelOption[] = [
     provider: 'claude',
   },
 ];
-
-/**
- * Cursor models derived from CURSOR_MODEL_MAP
- * IDs already have 'cursor-' prefix in the canonical format
- */
-export const CURSOR_MODELS: ModelOption[] = Object.entries(CURSOR_MODEL_MAP).map(
-  ([id, config]) => ({
-    id, // Already prefixed in canonical format
-    label: config.label,
-    description: config.description,
-    provider: 'cursor' as ModelProvider,
-    hasThinking: config.hasThinking,
-  })
-);
 
 /**
  * Codex/OpenAI models
@@ -115,17 +95,6 @@ export const CODEX_MODELS: ModelOption[] = [
 ];
 
 /**
- * OpenCode models derived from OPENCODE_MODEL_CONFIGS
- */
-export const OPENCODE_MODELS: ModelOption[] = OPENCODE_MODEL_CONFIGS.map((config) => ({
-  id: config.id,
-  label: config.label,
-  description: config.description,
-  badge: config.tier === 'free' ? 'Free' : config.tier === 'premium' ? 'Premium' : undefined,
-  provider: config.provider as ModelProvider,
-}));
-
-/**
  * Gemini models derived from GEMINI_MODEL_MAP
  * Model IDs already have 'gemini-' prefix (like Cursor models)
  */
@@ -141,33 +110,22 @@ export const GEMINI_MODELS: ModelOption[] = Object.entries(GEMINI_MODEL_MAP).map
 );
 
 /**
- * Copilot models derived from COPILOT_MODEL_MAP
- * Model IDs already have 'copilot-' prefix
- */
-export const COPILOT_MODELS: ModelOption[] = Object.entries(COPILOT_MODEL_MAP).map(
-  ([id, config]) => ({
-    id, // IDs already have copilot- prefix (e.g., 'copilot-gpt-4o')
-    label: config.label,
-    description: config.description,
-    badge: config.supportsVision ? 'Vision' : 'Standard',
-    provider: 'copilot' as ModelProvider,
-    hasThinking: false,
-  })
-);
-
-/**
- * All available models (Claude + Cursor + Codex + OpenCode + Gemini + Copilot)
+ * All available models (Claude + Codex + Gemini)
  */
 export const ALL_MODELS: ModelOption[] = [
   ...CLAUDE_MODELS,
-  ...CURSOR_MODELS,
   ...CODEX_MODELS,
-  ...OPENCODE_MODELS,
   ...GEMINI_MODELS,
-  ...COPILOT_MODELS,
 ];
 
-export const THINKING_LEVELS: ThinkingLevel[] = ['none', 'low', 'medium', 'high', 'ultrathink'];
+export const THINKING_LEVELS: ThinkingLevel[] = [
+  'none',
+  'low',
+  'medium',
+  'high',
+  'ultrathink',
+  'adaptive',
+];
 
 export const THINKING_LEVEL_LABELS: Record<ThinkingLevel, string> = {
   none: 'None',
@@ -175,6 +133,7 @@ export const THINKING_LEVEL_LABELS: Record<ThinkingLevel, string> = {
   medium: 'Med',
   high: 'High',
   ultrathink: 'Ultra',
+  adaptive: 'Adaptive',
 };
 
 /**
@@ -208,9 +167,6 @@ export const PROFILE_ICONS: Record<string, React.ComponentType<{ className?: str
   Rocket,
   Sparkles,
   Anthropic: AnthropicIcon,
-  Cursor: CursorIcon,
   Codex: OpenAIIcon,
-  OpenCode: OpenCodeIcon,
   Gemini: GeminiIcon,
-  Copilot: CopilotIcon,
 };

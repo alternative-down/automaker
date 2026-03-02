@@ -5,7 +5,6 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { FeatureCount } from '@/components/views/spec-view/types';
@@ -56,7 +55,7 @@ export function useCreateSpec(projectPath: string) {
     mutationFn: async (input: CreateSpecInput) => {
       const { projectOverview, generateFeatures, analyzeProject, featureCount } = input;
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.specRegeneration) {
         throw new Error('Spec regeneration API not available');
       }
@@ -90,7 +89,7 @@ export function useRegenerateSpec(projectPath: string) {
     mutationFn: async (input: RegenerateSpecInput) => {
       const { projectDefinition, generateFeatures, analyzeProject, featureCount } = input;
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.specRegeneration) {
         throw new Error('Spec regeneration API not available');
       }
@@ -121,7 +120,7 @@ export function useRegenerateSpec(projectPath: string) {
 export function useGenerateFeatures(projectPath: string) {
   return useMutation({
     mutationFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.specRegeneration) {
         throw new Error('Spec regeneration API not available');
       }
@@ -162,7 +161,7 @@ export function useSaveSpec(projectPath: string) {
         throw new Error('Invalid project path: cannot save spec without a valid project');
       }
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
 
       await api.writeFile(`${projectPath}/.automaker/app_spec.txt`, content);
 

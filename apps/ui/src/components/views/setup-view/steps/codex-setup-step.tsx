@@ -1,7 +1,6 @@
 // @ts-nocheck - Codex setup wizard with Electron API integration
 import { useMemo, useCallback } from 'react';
 import { useSetupStore } from '@/store/setup-store';
-import { getElectronAPI } from '@/lib/electron';
 import { CliSetupStep } from './cli-setup-step';
 import type { CodexAuthStatus } from '@/store/setup-store';
 
@@ -21,18 +20,18 @@ export function CodexSetupStep({ onNext, onBack, onSkip }: CodexSetupStepProps) 
   } = useSetupStore();
 
   const statusApi = useCallback(
-    () => getElectronAPI().setup?.getCodexStatus() || Promise.reject(),
+    () => .setup?.getCodexStatus() || Promise.reject(),
     []
   );
 
   const installApi = useCallback(
-    () => getElectronAPI().setup?.installCodex() || Promise.reject(),
+    () => .setup?.installCodex() || Promise.reject(),
     []
   );
 
   const verifyAuthApi = useCallback(
     (method: 'cli' | 'api_key', apiKey?: string) =>
-      getElectronAPI().setup?.verifyCodexAuth(method, apiKey) || Promise.reject(),
+      .setup?.verifyCodexAuth(method, apiKey) || Promise.reject(),
     []
   );
 

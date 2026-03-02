@@ -13,7 +13,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Wand2, Check, Plus, Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { getElectronAPI } from '@/lib/electron';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type {
@@ -29,7 +28,10 @@ import { useAppStore } from '@/store/app-store';
 /**
  * Normalize PhaseModelEntry or string to PhaseModelEntry
  */
-function normalizeEntry(entry: PhaseModelEntry | string): PhaseModelEntry {
+function normalizeEntry(entry: PhaseModelEntry | string | undefined | null): PhaseModelEntry {
+  if (!entry) {
+    return { model: 'claude-sonnet' as ModelAlias };
+  }
   if (typeof entry === 'string') {
     return { model: entry as ModelAlias | CursorModelId };
   }
@@ -92,7 +94,7 @@ export function BacklogPlanDialog({
       return;
     }
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.backlogPlan) {
       logger.warn('Backlog plan API not available');
       toast.error('API not available');
@@ -110,7 +112,12 @@ export function BacklogPlanDialog({
     // Use model override if set, otherwise use global default (extract model string from PhaseModelEntry)
     const effectiveModelEntry = modelOverride || normalizeEntry(phaseModels.backlogPlanningModel);
     const effectiveModel = effectiveModelEntry.model;
-    const result = await api.backlogPlan.generate(projectPath, prompt, effectiveModel);
+    const result = await api.backlogPlan.generate(
+      projectPath,
+      prompt,
+      effectiveModel,
+      currentBranch
+    );
     if (!result.success) {
       logger.error('Backlog plan generation failed to start', {
         error: result.error,
@@ -131,7 +138,15 @@ export function BacklogPlanDialog({
     });
     setPrompt('');
     onClose();
-  }, [projectPath, prompt, modelOverride, phaseModels, setIsGeneratingPlan, onClose]);
+  }, [
+    projectPath,
+    prompt,
+    modelOverride,
+    phaseModels,
+    setIsGeneratingPlan,
+    onClose,
+    currentBranch,
+  ]);
 
   const handleApply = useCallback(async () => {
     if (!pendingPlanResult) return;
@@ -146,7 +161,7 @@ export function BacklogPlanDialog({
       return;
     }
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.backlogPlan) {
       toast.error('API not available');
       return;
@@ -196,7 +211,7 @@ export function BacklogPlanDialog({
     setPendingPlanResult(null);
     setMode('input');
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (api?.backlogPlan) {
       await api.backlogPlan.clear(projectPath);
     }

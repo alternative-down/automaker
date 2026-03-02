@@ -1,5 +1,4 @@
 import { useMemo, useCallback } from 'react';
-import type { GitHubComment } from '@/lib/electron';
 import { useAppStore } from '@/store/app-store';
 import { useGitHubIssueComments } from '@/hooks/queries';
 

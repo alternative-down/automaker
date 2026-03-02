@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useIdeationStore, type GenerationJob } from '@/store/ideation-store';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { AnalysisSuggestion } from '@automaker/types';
@@ -323,7 +322,7 @@ export function IdeationDashboard({
     setAddingId(suggestion.id);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.ideation?.addSuggestionToBoard(currentProject.path, suggestion);
 
       if (result?.success) {
@@ -352,7 +351,7 @@ export function IdeationDashboard({
     }
 
     setIsAcceptingAll(true);
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     let successCount = 0;
     let failCount = 0;
 

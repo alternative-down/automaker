@@ -2,7 +2,7 @@
  * POST /features/generate-title endpoint - Generate a concise title from description
  *
  * Uses the provider abstraction to generate a short, descriptive title
- * from a feature description. Works with any configured provider (Claude, Cursor, etc.).
+ * from a feature description. Works with any configured provider (Claude, Codex, Gemini).
  */
 
 import type { Request, Response } from 'express';
@@ -34,7 +34,7 @@ export function createGenerateTitleHandler(
 ): (req: Request, res: Response) => Promise<void> {
   return async (req: Request, res: Response): Promise<void> => {
     try {
-      const { description, projectPath } = req.body as GenerateTitleRequestBody;
+      const { description } = req.body as GenerateTitleRequestBody;
 
       if (!description || typeof description !== 'string') {
         const response: GenerateTitleErrorResponse = {

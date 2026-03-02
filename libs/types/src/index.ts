@@ -1,6 +1,6 @@
 /**
  * @automaker/types
- * Shared type definitions for AutoMaker
+ * Shared type definitions for AutoMaker (Forked for Web-only)
  */
 
 // Provider types
@@ -19,11 +19,9 @@ export type {
   McpHttpServerConfig,
   AgentDefinition,
   ReasoningEffort,
-  // System prompt configuration for CLAUDE.md auto-loading
   SystemPromptPreset,
 } from './provider.js';
 
-// Provider constants and utilities
 export {
   DEFAULT_TIMEOUT_MS,
   REASONING_TIMEOUT_MULTIPLIERS,
@@ -36,7 +34,6 @@ export type {
   CodexApprovalPolicy,
   CodexCliConfig,
   CodexAuthStatus,
-  // Event types for CLI event parsing
   CodexEventType,
   CodexItemType,
   CodexEvent,
@@ -166,23 +163,18 @@ export type {
   BoardBackgroundSettings,
   WorktreeInfo,
   ProjectSettings,
-  // Event hook types
   EventHookTrigger,
   EventHookHttpMethod,
   EventHookShellAction,
   EventHookHttpAction,
   EventHookAction,
   EventHook,
-  // Claude-compatible provider types (new)
+  FeatureTemplate,
   ApiKeySource,
   ClaudeCompatibleProviderType,
   ClaudeModelAlias,
   ProviderModel,
   ClaudeCompatibleProvider,
-  ClaudeCompatibleProviderTemplate,
-  // Claude API profile types (deprecated)
-  ClaudeApiProfile,
-  ClaudeApiProfileTemplate,
 } from './settings.js';
 export {
   DEFAULT_KEYBOARD_SHORTCUTS,
@@ -196,12 +188,12 @@ export {
   PROJECT_SETTINGS_VERSION,
   THINKING_TOKEN_BUDGET,
   getThinkingTokenBudget,
-  // Event hook constants
+  isAdaptiveThinkingModel,
+  getThinkingLevelsForModel,
+  normalizeThinkingLevelForModel,
+  getDefaultThinkingLevel,
   EVENT_HOOK_TRIGGER_LABELS,
-  // Claude-compatible provider templates (new)
-  CLAUDE_PROVIDER_TEMPLATES,
-  // Claude API profile constants (deprecated)
-  CLAUDE_API_PROFILE_TEMPLATES,
+  DEFAULT_FEATURE_TEMPLATES,
 } from './settings.js';
 
 // Model display constants
@@ -246,28 +238,15 @@ export type {
   BacklogPlanApplyResult,
 } from './backlog-plan.js';
 
-// Cursor types
-export * from './cursor-models.js';
-export * from './cursor-cli.js';
-
-// OpenCode types
-export * from './opencode-models.js';
-
 // Gemini types
 export * from './gemini-models.js';
-
-// Copilot types
-export * from './copilot-models.js';
 
 // Provider utilities
 export {
   PROVIDER_PREFIXES,
-  isCursorModel,
   isClaudeModel,
   isCodexModel,
-  isOpencodeModel,
   isGeminiModel,
-  isCopilotModel,
   getModelProvider,
   stripProviderPrefix,
   addProviderPrefix,
@@ -279,12 +258,8 @@ export {
 
 // Model migration utilities
 export {
-  isLegacyCursorModelId,
-  isLegacyOpencodeModelId,
   isLegacyClaudeAlias,
   migrateModelId,
-  migrateCursorModelIds,
-  migrateOpencodeModelIds,
   migratePhaseModelEntry,
   getBareModelIdForCli,
 } from './model-migration.js';
@@ -355,6 +330,7 @@ export type {
   AddRemoteResult,
   AddRemoteResponse,
   AddRemoteErrorResponse,
+  MergeStateInfo,
 } from './worktree.js';
 export { PR_STATES, validatePRState } from './worktree.js';
 

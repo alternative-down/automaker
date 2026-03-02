@@ -1,7 +1,6 @@
 import { Plus, FolderOpen, Recycle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatShortcut } from '@/store/app-store';
-import type { TrashedProject } from '@/lib/electron';
 
 interface ProjectActionsProps {
   setShowNewProjectModal: (show: boolean) => void;

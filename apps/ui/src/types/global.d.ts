@@ -6,7 +6,6 @@
  */
 
 import type { Feature } from '@automaker/types';
-import type { ElectronAPI } from '../lib/electron';
 
 /**
  * Mock context file data for testing
@@ -55,7 +54,6 @@ declare global {
     /**
      * Electron API exposed via preload script
      */
-    electronAPI?: ElectronAPI & {
       isElectron?: boolean;
       getServerUrl?: () => Promise<string>;
       getApiKey?: () => Promise<string | null>;

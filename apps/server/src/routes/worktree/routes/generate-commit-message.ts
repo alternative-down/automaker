@@ -1,17 +1,14 @@
 /**
  * POST /worktree/generate-commit-message endpoint - Generate an AI commit message from git diff
- *
- * Uses the configured model (via phaseModels.commitMessageModel) to generate a concise,
- * conventional commit message from git changes. Defaults to Claude Haiku for speed.
  */
 
 import type { Request, Response } from 'express';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { existsSync } from 'fs';
 import { join } from 'path';
 import { createLogger } from '@automaker/utils';
-import { isCursorModel, stripProviderPrefix } from '@automaker/types';
+import { stripProviderPrefix } from '@automaker/types';
 import { resolvePhaseModel } from '@automaker/model-resolver';
 import { mergeCommitMessagePrompts } from '@automaker/prompts';
 import { ProviderFactory } from '../../../providers/provider-factory.js';
@@ -20,230 +17,64 @@ import { getErrorMessage, logError } from '../common.js';
 import { getPhaseModelWithOverrides } from '../../../lib/settings-helpers.js';
 
 const logger = createLogger('GenerateCommitMessage');
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
-/** Timeout for AI provider calls in milliseconds (30 seconds) */
-const AI_TIMEOUT_MS = 30_000;
-
-/**
- * Wraps an async generator with a timeout.
- * If the generator takes longer than the timeout, it throws an error.
- */
-async function* withTimeout<T>(
-  generator: AsyncIterable<T>,
-  timeoutMs: number
-): AsyncGenerator<T, void, unknown> {
-  const timeoutPromise = new Promise<never>((_, reject) => {
-    setTimeout(() => reject(new Error(`AI provider timed out after ${timeoutMs}ms`)), timeoutMs);
-  });
-
-  const iterator = generator[Symbol.asyncIterator]();
-  let done = false;
-
-  while (!done) {
-    const result = await Promise.race([iterator.next(), timeoutPromise]);
-    if (result.done) {
-      done = true;
-    } else {
-      yield result.value;
-    }
-  }
-}
-
-/**
- * Get the effective system prompt for commit message generation.
- * Uses custom prompt from settings if enabled, otherwise falls back to default.
- */
 async function getSystemPrompt(settingsService?: SettingsService): Promise<string> {
   const settings = await settingsService?.getGlobalSettings();
   const prompts = mergeCommitMessagePrompts(settings?.promptCustomization?.commitMessage);
   return prompts.systemPrompt;
 }
 
-interface GenerateCommitMessageRequestBody {
-  worktreePath: string;
-}
-
-interface GenerateCommitMessageSuccessResponse {
-  success: true;
-  message: string;
-}
-
-interface GenerateCommitMessageErrorResponse {
-  success: false;
-  error: string;
-}
-
-export function createGenerateCommitMessageHandler(
-  settingsService?: SettingsService
-): (req: Request, res: Response) => Promise<void> {
+export function createGenerateCommitMessageHandler(settingsService?: SettingsService): (req: Request, res: Response) => Promise<void> {
   return async (req: Request, res: Response): Promise<void> => {
     try {
-      const { worktreePath } = req.body as GenerateCommitMessageRequestBody;
-
+      const { worktreePath } = req.body;
       if (!worktreePath || typeof worktreePath !== 'string') {
-        const response: GenerateCommitMessageErrorResponse = {
-          success: false,
-          error: 'worktreePath is required and must be a string',
-        };
-        res.status(400).json(response);
+        res.status(400).json({ success: false, error: 'worktreePath is required' });
         return;
       }
 
-      // Validate that the directory exists
-      if (!existsSync(worktreePath)) {
-        const response: GenerateCommitMessageErrorResponse = {
-          success: false,
-          error: 'worktreePath does not exist',
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      // Validate that it's a git repository (check for .git folder or file for worktrees)
-      const gitPath = join(worktreePath, '.git');
-      if (!existsSync(gitPath)) {
-        const response: GenerateCommitMessageErrorResponse = {
-          success: false,
-          error: 'worktreePath is not a git repository',
-        };
-        res.status(400).json(response);
-        return;
-      }
-
-      logger.info(`Generating commit message for worktree: ${worktreePath}`);
-
-      // Get git diff of staged and unstaged changes
-      let diff = '';
-      try {
-        // First try to get staged changes
-        const { stdout: stagedDiff } = await execAsync('git diff --cached', {
-          cwd: worktreePath,
-          maxBuffer: 1024 * 1024 * 5, // 5MB buffer
-        });
-
-        // If no staged changes, get unstaged changes
-        if (!stagedDiff.trim()) {
-          const { stdout: unstagedDiff } = await execAsync('git diff', {
-            cwd: worktreePath,
-            maxBuffer: 1024 * 1024 * 5, // 5MB buffer
-          });
-          diff = unstagedDiff;
-        } else {
-          diff = stagedDiff;
-        }
-      } catch (error) {
-        logger.error('Failed to get git diff:', error);
-        const response: GenerateCommitMessageErrorResponse = {
-          success: false,
-          error: 'Failed to get git changes',
-        };
-        res.status(500).json(response);
-        return;
+      let { stdout: diff } = await execFileAsync('git', ['diff', '--cached'], { cwd: worktreePath });
+      if (!diff.trim()) {
+        const { stdout: unstaged } = await execFileAsync('git', ['diff'], { cwd: worktreePath });
+        diff = unstaged;
       }
 
       if (!diff.trim()) {
-        const response: GenerateCommitMessageErrorResponse = {
-          success: false,
-          error: 'No changes to commit',
-        };
-        res.status(400).json(response);
+        res.status(400).json({ success: false, error: 'No changes to commit' });
         return;
       }
 
-      // Truncate diff if too long (keep first 10000 characters to avoid token limits)
-      const truncatedDiff =
-        diff.length > 10000 ? diff.substring(0, 10000) + '\n\n[... diff truncated ...]' : diff;
-
-      const userPrompt = `Generate a commit message for these changes:\n\n\`\`\`diff\n${truncatedDiff}\n\`\`\``;
-
-      // Get model from phase settings with provider info
-      const {
-        phaseModel: phaseModelEntry,
-        provider: claudeCompatibleProvider,
-        credentials,
-      } = await getPhaseModelWithOverrides(
-        'commitMessageModel',
-        settingsService,
-        worktreePath,
-        '[GenerateCommitMessage]'
-      );
+      const { phaseModel: phaseModelEntry, provider, credentials } = await getPhaseModelWithOverrides('commitMessageModel', settingsService, worktreePath, '[GenerateCommitMessage]');
       const { model, thinkingLevel } = resolvePhaseModel(phaseModelEntry);
-
-      logger.info(
-        `Using model for commit message: ${model}`,
-        claudeCompatibleProvider ? `via provider: ${claudeCompatibleProvider.name}` : 'direct API'
-      );
-
-      // Get the effective system prompt (custom or default)
       const systemPrompt = await getSystemPrompt(settingsService);
 
-      // Get provider for the model type
       const aiProvider = ProviderFactory.getProviderForModel(model);
       const bareModel = stripProviderPrefix(model);
 
-      // For Cursor models, combine prompts since Cursor doesn't support systemPrompt separation
-      const effectivePrompt = isCursorModel(model)
-        ? `${systemPrompt}\n\n${userPrompt}`
-        : userPrompt;
-      const effectiveSystemPrompt = isCursorModel(model) ? undefined : systemPrompt;
-
-      logger.info(`Using ${aiProvider.getName()} provider for model: ${model}`);
-
       let responseText = '';
       const stream = aiProvider.executeQuery({
-        prompt: effectivePrompt,
+        prompt: `Generate commit message for diff:\n\n${diff.substring(0, 10000)}`,
         model: bareModel,
         cwd: worktreePath,
-        systemPrompt: effectiveSystemPrompt,
+        systemPrompt,
         maxTurns: 1,
-        allowedTools: [],
-        readOnly: true,
-        thinkingLevel, // Pass thinking level for extended thinking support
-        claudeCompatibleProvider, // Pass provider for alternative endpoint configuration
-        credentials, // Pass credentials for resolving 'credentials' apiKeySource
+        thinkingLevel,
+        claudeCompatibleProvider: provider,
+        credentials,
       });
 
-      // Wrap with timeout to prevent indefinite hangs
-      for await (const msg of withTimeout(stream, AI_TIMEOUT_MS)) {
+      for await (const msg of stream) {
         if (msg.type === 'assistant' && msg.message?.content) {
           for (const block of msg.message.content) {
-            if (block.type === 'text' && block.text) {
-              responseText += block.text;
-            }
+            if (block.type === 'text') responseText += block.text;
           }
-        } else if (msg.type === 'result' && msg.subtype === 'success' && msg.result) {
-          // Use result if available (some providers return final text here)
-          responseText = msg.result;
         }
       }
 
-      const message = responseText.trim();
-
-      if (!message || message.trim().length === 0) {
-        logger.warn('Received empty response from model');
-        const response: GenerateCommitMessageErrorResponse = {
-          success: false,
-          error: 'Failed to generate commit message - empty response',
-        };
-        res.status(500).json(response);
-        return;
-      }
-
-      logger.info(`Generated commit message: ${message.trim().substring(0, 100)}...`);
-
-      const response: GenerateCommitMessageSuccessResponse = {
-        success: true,
-        message: message.trim(),
-      };
-      res.json(response);
+      res.json({ success: true, message: responseText.trim() });
     } catch (error) {
-      logError(error, 'Generate commit message failed');
-      const response: GenerateCommitMessageErrorResponse = {
-        success: false,
-        error: getErrorMessage(error),
-      };
-      res.status(500).json(response);
+      res.status(500).json({ success: false, error: (error as Error).message });
     }
   };
 }

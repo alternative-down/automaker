@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/accordion';
 import { useSetupStore } from '@/store/setup-store';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import {
   CheckCircle2,
   Key,
@@ -59,6 +58,7 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
   // CLI Verification state
   const [cliVerificationStatus, setCliVerificationStatus] = useState<VerificationStatus>('idle');
   const [cliVerificationError, setCliVerificationError] = useState<string | null>(null);
+  const [cliAuthType, setCliAuthType] = useState<'oauth' | 'cli' | null>(null);
 
   // API Key Verification state
   const [apiKeyVerificationStatus, setApiKeyVerificationStatus] =
@@ -70,12 +70,12 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
 
   // Memoize API functions to prevent infinite loops
   const statusApi = useCallback(
-    () => getElectronAPI().setup?.getClaudeStatus() || Promise.reject(),
+    () => .setup?.getClaudeStatus() || Promise.reject(),
     []
   );
 
   const installApi = useCallback(
-    () => getElectronAPI().setup?.installClaude() || Promise.reject(),
+    () => .setup?.installClaude() || Promise.reject(),
     []
   );
 
@@ -96,7 +96,7 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
   const { isInstalling, installProgress, install } = useCliInstallation({
     cliType: 'claude',
     installApi,
-    onProgressEvent: getElectronAPI().setup?.onInstallProgress,
+    onProgressEvent: .setup?.onInstallProgress,
     onSuccess: onInstallSuccess,
     getStoreState,
   });
@@ -119,9 +119,10 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
   const verifyCliAuth = useCallback(async () => {
     setCliVerificationStatus('verifying');
     setCliVerificationError(null);
+    setCliAuthType(null);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.verifyClaudeAuth) {
         setCliVerificationStatus('error');
         setCliVerificationError('Verification API not available');
@@ -138,12 +139,21 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
 
       if (result.authenticated && !hasLimitReachedError) {
         setCliVerificationStatus('verified');
+        // Store the auth type for displaying specific success message
+        const authType = result.authType === 'oauth' ? 'oauth' : 'cli';
+        setCliAuthType(authType);
         setClaudeAuthStatus({
           authenticated: true,
-          method: 'cli_authenticated',
+          method: authType === 'oauth' ? 'oauth_token' : 'cli_authenticated',
           hasCredentialsFile: claudeAuthStatus?.hasCredentialsFile || false,
+          oauthTokenValid: authType === 'oauth',
         });
-        toast.success('Claude CLI authentication verified!');
+        // Show specific success message based on auth type
+        if (authType === 'oauth') {
+          toast.success('Claude Code subscription detected and verified!');
+        } else {
+          toast.success('Claude CLI authentication verified!');
+        }
       } else {
         setCliVerificationStatus('error');
         setCliVerificationError(
@@ -176,7 +186,7 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
     setApiKeyVerificationError(null);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.verifyClaudeAuth) {
         setApiKeyVerificationStatus('error');
         setApiKeyVerificationError('Verification API not available');
@@ -210,7 +220,7 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
   const deleteApiKey = useCallback(async () => {
     setIsDeletingApiKey(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.deleteApiKey) {
         toast.error('Delete API not available');
         return;
@@ -436,9 +446,15 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
                   <div className="flex items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <div>
-                      <p className="font-medium text-foreground">CLI Authentication verified!</p>
+                      <p className="font-medium text-foreground">
+                        {cliAuthType === 'oauth'
+                          ? 'Claude Code subscription verified!'
+                          : 'CLI Authentication verified!'}
+                      </p>
                       <p className="text-sm text-muted-foreground">
-                        Your Claude CLI is working correctly.
+                        {cliAuthType === 'oauth'
+                          ? 'Your Claude Code subscription is active and ready to use.'
+                          : 'Your Claude CLI is working correctly.'}
                       </p>
                     </div>
                   </div>

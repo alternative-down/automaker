@@ -8,7 +8,6 @@ import { useState, useEffect, useCallback } from 'react';
 import type { MultiProjectOverview } from '@automaker/types';
 import { createLogger } from '@automaker/utils/logger';
 import {
-  getApiKey,
   getSessionToken,
   waitForApiKeyInit,
   getServerUrlSync,
@@ -25,10 +24,8 @@ interface UseMultiProjectStatusResult {
 
 /**
  * Custom fetch function for projects overview
- * Uses the same pattern as HttpApiClient for proper authentication
  */
 async function fetchProjectsOverview(): Promise<MultiProjectOverview> {
-  // Ensure API key is initialized before making request (handles Electron/web mode timing)
   await waitForApiKeyInit();
 
   const serverUrl = getServerUrlSync();
@@ -37,22 +34,16 @@ async function fetchProjectsOverview(): Promise<MultiProjectOverview> {
     'Content-Type': 'application/json',
   };
 
-  // Electron mode: use API key
-  const apiKey = getApiKey();
-  if (apiKey) {
-    headers['X-API-Key'] = apiKey;
-  } else {
-    // Web mode: use session token if available
-    const sessionToken = getSessionToken();
-    if (sessionToken) {
-      headers['X-Session-Token'] = sessionToken;
-    }
+  // Web mode: use session token
+  const sessionToken = getSessionToken();
+  if (sessionToken) {
+    headers['X-Session-Token'] = sessionToken;
   }
 
   const response = await fetch(`${serverUrl}/api/projects/overview`, {
     method: 'GET',
     headers,
-    credentials: 'include', // Include cookies for session auth
+    credentials: 'include',
     cache: 'no-store',
   });
 

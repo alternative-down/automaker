@@ -1,6 +1,5 @@
 import { useMemo, useCallback } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { useAppStore } from '@/store/app-store';
 import { useAvailableEditors as useAvailableEditorsQuery } from '@/hooks/queries';
 import { queryKeys } from '@/lib/query-keys';
@@ -25,7 +24,7 @@ export function useAvailableEditors() {
    */
   const { mutate: refreshMutate, isPending: isRefreshing } = useMutation({
     mutationFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }

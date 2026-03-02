@@ -19,10 +19,8 @@ import {
   ArchiveRestore,
 } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { cn } from '@/lib/utils';
-import type { SessionListItem } from '@/types/electron';
+import { cn, pathsEqual } from '@/lib/utils';
 import { useKeyboardShortcutsConfig } from '@/hooks/use-keyboard-shortcuts';
-import { getElectronAPI } from '@/lib/electron';
 import { useSessions } from '@/hooks/queries';
 import { queryKeys } from '@/lib/query-keys';
 import { DeleteSessionDialog } from '@/components/dialogs/delete-session-dialog';
@@ -93,6 +91,7 @@ interface SessionManagerProps {
   currentSessionId: string | null;
   onSelectSession: (sessionId: string | null) => void;
   projectPath: string;
+  workingDirectory?: string; // Current worktree path for scoping sessions
   isCurrentSessionThinking?: boolean;
   onQuickCreateRef?: React.MutableRefObject<(() => Promise<void>) | null>;
 }
@@ -101,6 +100,7 @@ export function SessionManager({
   currentSessionId,
   onSelectSession,
   projectPath,
+  workingDirectory,
   isCurrentSessionThinking = false,
   onQuickCreateRef,
 }: SessionManagerProps) {
@@ -124,7 +124,7 @@ export function SessionManager({
 
   // Check running state for all sessions
   const checkRunningSessions = useCallback(async (sessionList: SessionListItem[]) => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.agent) return;
 
     const runningIds = new Set<string>();
@@ -153,6 +153,7 @@ export function SessionManager({
     if (result.data) {
       await checkRunningSessions(result.data);
     }
+    return result;
   }, [queryClient, refetchSessions, checkRunningSessions]);
 
   // Check running state on initial load (runs only once when sessions first load)
@@ -177,14 +178,17 @@ export function SessionManager({
     return () => clearInterval(interval);
   }, [sessions, runningSessions.size, isCurrentSessionThinking, checkRunningSessions]);
 
+  // Effective working directory for session creation (worktree path or project path)
+  const effectiveWorkingDirectory = workingDirectory || projectPath;
+
   // Create new session with random name
   const handleCreateSession = async () => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.sessions) return;
 
     const sessionName = newSessionName.trim() || generateRandomSessionName();
 
-    const result = await api.sessions.create(sessionName, projectPath, projectPath);
+    const result = await api.sessions.create(sessionName, projectPath, effectiveWorkingDirectory);
 
     if (result.success && result.session?.id) {
       setNewSessionName('');
@@ -195,19 +199,19 @@ export function SessionManager({
   };
 
   // Create new session directly with a random name (one-click)
-  const handleQuickCreateSession = async () => {
-    const api = getElectronAPI();
+  const handleQuickCreateSession = useCallback(async () => {
+    const api = getHttpApiClient();
     if (!api?.sessions) return;
 
     const sessionName = generateRandomSessionName();
 
-    const result = await api.sessions.create(sessionName, projectPath, projectPath);
+    const result = await api.sessions.create(sessionName, projectPath, effectiveWorkingDirectory);
 
     if (result.success && result.session?.id) {
       await invalidateSessions();
       onSelectSession(result.session.id);
     }
-  };
+  }, [effectiveWorkingDirectory, projectPath, invalidateSessions, onSelectSession]);
 
   // Expose the quick create function via ref for keyboard shortcuts
   useEffect(() => {
@@ -219,11 +223,11 @@ export function SessionManager({
         onQuickCreateRef.current = null;
       }
     };
-  }, [onQuickCreateRef, projectPath]);
+  }, [onQuickCreateRef, handleQuickCreateSession]);
 
   // Rename session
   const handleRenameSession = async (sessionId: string) => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!editingName.trim() || !api?.sessions) return;
 
     const result = await api.sessions.update(sessionId, editingName, undefined);
@@ -237,7 +241,7 @@ export function SessionManager({
 
   // Archive session
   const handleArchiveSession = async (sessionId: string) => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.sessions) {
       logger.error('[SessionManager] Sessions API not available');
       return;
@@ -261,7 +265,7 @@ export function SessionManager({
 
   // Unarchive session
   const handleUnarchiveSession = async (sessionId: string) => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.sessions) {
       logger.error('[SessionManager] Sessions API not available');
       return;
@@ -287,17 +291,25 @@ export function SessionManager({
 
   // Confirm delete session
   const confirmDeleteSession = async (sessionId: string) => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.sessions) return;
 
     const result = await api.sessions.delete(sessionId);
     if (result.success) {
-      await invalidateSessions();
+      const refetchResult = await invalidateSessions();
       if (currentSessionId === sessionId) {
-        // Switch to another session or create a new one
-        const activeSessionsList = sessions.filter((s) => !s.isArchived);
+        // Switch to another session using fresh data, excluding the deleted session
+        // Filter to sessions within the same worktree to avoid jumping to a different worktree
+        const freshSessions = refetchResult?.data ?? [];
+        const activeSessionsList = freshSessions.filter((s) => {
+          if (s.isArchived || s.id === sessionId) return false;
+          const sessionDir = s.workingDirectory || s.projectPath;
+          return pathsEqual(sessionDir, effectiveWorkingDirectory);
+        });
         if (activeSessionsList.length > 0) {
           onSelectSession(activeSessionsList[0].id);
+        } else {
+          onSelectSession(null);
         }
       }
     }
@@ -306,7 +318,7 @@ export function SessionManager({
 
   // Delete all archived sessions
   const handleDeleteAllArchivedSessions = async () => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.sessions) return;
 
     // Delete each archived session
@@ -318,8 +330,16 @@ export function SessionManager({
     setIsDeleteAllArchivedDialogOpen(false);
   };
 
-  const activeSessions = sessions.filter((s) => !s.isArchived);
-  const archivedSessions = sessions.filter((s) => s.isArchived);
+  // Filter sessions by current working directory (worktree scoping)
+  const scopedSessions = sessions.filter((s) => {
+    const sessionDir = s.workingDirectory || s.projectPath;
+    // Match sessions whose workingDirectory matches the current effective directory
+    // Use pathsEqual for cross-platform path normalization (trailing slashes, separators)
+    return pathsEqual(sessionDir, effectiveWorkingDirectory);
+  });
+
+  const activeSessions = scopedSessions.filter((s) => !s.isArchived);
+  const archivedSessions = scopedSessions.filter((s) => s.isArchived);
   const displayedSessions = activeTab === 'active' ? activeSessions : archivedSessions;
 
   return (

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 import { pathsEqual } from '@/lib/utils';
 
 const logger = createLogger('DevServerLogs');
@@ -74,7 +73,7 @@ export function useDevServerLogs({ worktreePath, autoSubscribe = true }: UseDevS
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api?.worktree?.getDevServerLogs) {
         setState((prev) => ({
           ...prev,
@@ -159,7 +158,7 @@ export function useDevServerLogs({ worktreePath, autoSubscribe = true }: UseDevS
   useEffect(() => {
     if (!worktreePath || !autoSubscribe) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.worktree?.onDevServerLogEvent) {
       logger.warn('Dev server log event API not available');
       return;
@@ -203,6 +202,16 @@ export function useDevServerLogs({ worktreePath, autoSubscribe = true }: UseDevS
             isRunning: false,
             exitCode: payload.exitCode,
             serverError: payload.error ?? null,
+          }));
+          break;
+        }
+        case 'dev-server:url-detected': {
+          const { payload } = event;
+          logger.info('Dev server URL detected:', payload);
+          setState((prev) => ({
+            ...prev,
+            url: payload.url,
+            port: payload.port,
           }));
           break;
         }

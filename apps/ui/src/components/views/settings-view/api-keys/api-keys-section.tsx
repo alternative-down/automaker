@@ -9,7 +9,6 @@ import { SecurityNotice } from './security-notice';
 import { useApiKeyManagement } from './hooks/use-api-key-management';
 import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
-import { getElectronAPI } from '@/lib/electron';
 import { toast } from 'sonner';
 
 export function ApiKeysSection() {
@@ -26,7 +25,7 @@ export function ApiKeysSection() {
   const deleteAnthropicKey = useCallback(async () => {
     setIsDeletingAnthropicKey(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.deleteApiKey) {
         toast.error('Delete API not available');
         return;
@@ -55,7 +54,7 @@ export function ApiKeysSection() {
   const deleteOpenaiKey = useCallback(async () => {
     setIsDeletingOpenaiKey(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.deleteApiKey) {
         toast.error('Delete API not available');
         return;

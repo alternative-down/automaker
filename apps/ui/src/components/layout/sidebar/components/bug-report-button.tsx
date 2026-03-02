@@ -1,7 +1,6 @@
 import { Bug } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
-import { getElectronAPI } from '@/lib/electron';
 
 interface BugReportButtonProps {
   sidebarExpanded: boolean;
@@ -9,7 +8,7 @@ interface BugReportButtonProps {
 
 export function BugReportButton({ sidebarExpanded }: BugReportButtonProps) {
   const handleBugReportClick = useCallback(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     api.openExternalLink('https://github.com/AutoMaker-Org/automaker/issues');
   }, []);
 

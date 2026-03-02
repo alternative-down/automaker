@@ -3,8 +3,6 @@ import { createLogger } from '@automaker/utils/logger';
 import { toast } from 'sonner';
 
 const logger = createLogger('SpecRegeneration');
-import { getElectronAPI } from '@/lib/electron';
-import type { SpecRegenerationEvent } from '@/types/electron';
 
 interface UseSpecRegenerationProps {
   creatingSpecProjectPath: string | null;
@@ -29,7 +27,7 @@ export function useSpecRegeneration({
 }: UseSpecRegenerationProps) {
   // Subscribe to spec regeneration events
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.specRegeneration) return;
 
     const unsubscribe = api.specRegeneration.onEvent((event: SpecRegenerationEvent) => {

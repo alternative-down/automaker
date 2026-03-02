@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Bot, Send, User, Sparkles, FileText, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn, generateUUID } from '@/lib/utils';
-import { getElectronAPI } from '@/lib/electron';
 import { Markdown } from '@/components/ui/markdown';
 import { useFileBrowser } from '@/contexts/file-browser-context';
 import { toast } from 'sonner';
@@ -320,10 +319,9 @@ export function InterviewView() {
 
     try {
       saveLastProjectDirectory(projectPath);
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       // Use platform-specific path separator
       const pathSep =
-        typeof window !== 'undefined' && window.electronAPI
           ? navigator.platform.indexOf('Win') !== -1
             ? '\\'
             : '/'

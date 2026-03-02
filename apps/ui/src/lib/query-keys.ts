@@ -70,6 +70,9 @@ export const queryKeys = {
     /** Issue comments */
     issueComments: (projectPath: string, issueNumber: number) =>
       ['github', 'issues', projectPath, issueNumber, 'comments'] as const,
+    /** PR review comments */
+    prReviewComments: (projectPath: string, prNumber: number) =>
+      ['github', 'prs', projectPath, prNumber, 'review-comments'] as const,
     /** Remote info */
     remote: (projectPath: string) => ['github', 'remote', projectPath] as const,
   },
@@ -99,6 +102,10 @@ export const queryKeys = {
     claude: () => ['usage', 'claude'] as const,
     /** Codex API usage */
     codex: () => ['usage', 'codex'] as const,
+    /** z.ai API usage */
+    zai: () => ['usage', 'zai'] as const,
+    /** Gemini API usage */
+    gemini: () => ['usage', 'gemini'] as const,
   },
 
   // ============================================
@@ -109,10 +116,6 @@ export const queryKeys = {
     available: () => ['models', 'available'] as const,
     /** Codex models */
     codex: () => ['models', 'codex'] as const,
-    /** OpenCode models */
-    opencode: () => ['models', 'opencode'] as const,
-    /** OpenCode providers */
-    opencodeProviders: () => ['models', 'opencode', 'providers'] as const,
     /** Provider status */
     providers: () => ['models', 'providers'] as const,
   },
@@ -170,30 +173,16 @@ export const queryKeys = {
   cli: {
     /** Claude CLI status */
     claude: () => ['cli', 'claude'] as const,
-    /** Cursor CLI status */
-    cursor: () => ['cli', 'cursor'] as const,
     /** Codex CLI status */
     codex: () => ['cli', 'codex'] as const,
-    /** OpenCode CLI status */
-    opencode: () => ['cli', 'opencode'] as const,
     /** Gemini CLI status */
     gemini: () => ['cli', 'gemini'] as const,
-    /** Copilot SDK status */
-    copilot: () => ['cli', 'copilot'] as const,
     /** GitHub CLI status */
     github: () => ['cli', 'github'] as const,
     /** API keys status */
     apiKeys: () => ['cli', 'apiKeys'] as const,
     /** Platform info */
     platform: () => ['cli', 'platform'] as const,
-  },
-
-  // ============================================
-  // Cursor Permissions
-  // ============================================
-  cursorPermissions: {
-    /** Cursor permissions for a project */
-    permissions: (projectPath?: string) => ['cursorPermissions', projectPath] as const,
   },
 
   // ============================================

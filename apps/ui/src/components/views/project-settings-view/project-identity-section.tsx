@@ -9,7 +9,6 @@ import { IconPicker } from '@/components/layout/project-switcher/components/icon
 import { getAuthenticatedImageUrl } from '@/lib/api-fetch';
 import { getHttpApiClient } from '@/lib/http-api-client';
 import { toast } from 'sonner';
-import type { Project } from '@/lib/electron';
 
 interface ProjectIdentitySectionProps {
   project: Project;

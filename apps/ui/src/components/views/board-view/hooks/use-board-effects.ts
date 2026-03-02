@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { getElectronAPI } from '@/lib/electron';
 import { createLogger } from '@automaker/utils/logger';
 import type { Feature } from '@/store/app-store';
 
@@ -43,7 +42,7 @@ export function useBoardEffects({
 
   // Subscribe to spec regeneration events to clear creating state on completion
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.specRegeneration) return;
 
     const unsubscribe = api.specRegeneration.onEvent((event) => {
@@ -103,7 +102,7 @@ export function useBoardEffects({
   // Re-check context when a feature stops, completes, or errors
   // This ensures hasContext is updated even if the features array doesn't change
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.autoMode) return;
 
     const unsubscribe = api.autoMode.onEvent(async (event) => {

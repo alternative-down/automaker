@@ -5,7 +5,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 
@@ -18,7 +17,7 @@ export function useClaudeCliStatus() {
   return useQuery({
     queryKey: queryKeys.cli.claude(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup) {
         throw new Error('Setup API not available');
       }
@@ -41,7 +40,7 @@ export function useGitHubCliStatus() {
   return useQuery({
     queryKey: queryKeys.cli.github(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.getGhStatus) {
         throw new Error('GitHub CLI status API not available');
       }
@@ -64,7 +63,7 @@ export function useApiKeysStatus() {
   return useQuery({
     queryKey: queryKeys.cli.apiKeys(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup) {
         throw new Error('Setup API not available');
       }
@@ -87,7 +86,7 @@ export function usePlatformInfo() {
   return useQuery({
     queryKey: queryKeys.cli.platform(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup) {
         throw new Error('Setup API not available');
       }
@@ -102,52 +101,6 @@ export function usePlatformInfo() {
 }
 
 /**
- * Fetch Cursor CLI status
- *
- * @returns Query result with Cursor CLI status
- */
-export function useCursorCliStatus() {
-  return useQuery({
-    queryKey: queryKeys.cli.cursor(),
-    queryFn: async () => {
-      const api = getElectronAPI();
-      if (!api.setup?.getCursorStatus) {
-        throw new Error('Cursor CLI status API not available');
-      }
-      const result = await api.setup.getCursorStatus();
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch Cursor CLI status');
-      }
-      return result;
-    },
-    staleTime: STALE_TIMES.CLI_STATUS,
-  });
-}
-
-/**
- * Fetch Copilot CLI status
- *
- * @returns Query result with Copilot CLI status
- */
-export function useCopilotCliStatus() {
-  return useQuery({
-    queryKey: queryKeys.cli.copilot(),
-    queryFn: async () => {
-      const api = getElectronAPI();
-      if (!api.setup?.getCopilotStatus) {
-        throw new Error('Copilot CLI status API not available');
-      }
-      const result = await api.setup.getCopilotStatus();
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch Copilot CLI status');
-      }
-      return result;
-    },
-    staleTime: STALE_TIMES.CLI_STATUS,
-  });
-}
-
-/**
  * Fetch Gemini CLI status
  *
  * @returns Query result with Gemini CLI status
@@ -156,36 +109,13 @@ export function useGeminiCliStatus() {
   return useQuery({
     queryKey: queryKeys.cli.gemini(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.getGeminiStatus) {
         throw new Error('Gemini CLI status API not available');
       }
       const result = await api.setup.getGeminiStatus();
       if (!result.success) {
         throw new Error(result.error || 'Failed to fetch Gemini CLI status');
-      }
-      return result;
-    },
-    staleTime: STALE_TIMES.CLI_STATUS,
-  });
-}
-
-/**
- * Fetch OpenCode CLI status
- *
- * @returns Query result with OpenCode CLI status
- */
-export function useOpencodeCliStatus() {
-  return useQuery({
-    queryKey: queryKeys.cli.opencode(),
-    queryFn: async () => {
-      const api = getElectronAPI();
-      if (!api.setup?.getOpencodeStatus) {
-        throw new Error('OpenCode CLI status API not available');
-      }
-      const result = await api.setup.getOpencodeStatus();
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to fetch OpenCode CLI status');
       }
       return result;
     },

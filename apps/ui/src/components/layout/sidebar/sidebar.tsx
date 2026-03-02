@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, startTransition } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { useNavigate, useLocation } from '@tanstack/react-router';
 import { PanelLeftClose, ChevronDown } from 'lucide-react';
@@ -6,11 +6,9 @@ import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/app-store';
 import { useNotificationsStore } from '@/store/notifications-store';
 import { useKeyboardShortcuts, useKeyboardShortcutsConfig } from '@/hooks/use-keyboard-shortcuts';
-import { getElectronAPI } from '@/lib/electron';
 import { initializeProject, hasAppSpec, hasAutomakerDir } from '@/lib/project-init';
 import { toast } from 'sonner';
 import { useIsCompact } from '@/hooks/use-media-query';
-import type { Project } from '@/lib/electron';
 
 // Sidebar components
 import {
@@ -39,6 +37,7 @@ import { EditProjectDialog } from '../project-switcher/components/edit-project-d
 
 // Import shared dialogs
 import { DeleteProjectDialog } from '@/components/views/settings-view/components/delete-project-dialog';
+import { RemoveFromAutomakerDialog } from '@/components/views/settings-view/components/remove-from-automaker-dialog';
 import { NewProjectModal } from '@/components/dialogs/new-project-modal';
 import { CreateSpecDialog } from '@/components/views/spec-view/dialogs';
 
@@ -65,6 +64,7 @@ export function Sidebar() {
     cyclePrevProject,
     cycleNextProject,
     moveProjectToTrash,
+    removeProject,
     specCreatingForProject,
     setSpecCreatingForProject,
     setCurrentProject,
@@ -91,6 +91,8 @@ export function Sidebar() {
 
   // State for delete project confirmation dialog
   const [showDeleteProjectDialog, setShowDeleteProjectDialog] = useState(false);
+  // State for remove from automaker confirmation dialog
+  const [showRemoveFromAutomakerDialog, setShowRemoveFromAutomakerDialog] = useState(false);
 
   // State for trash dialog
   const [showTrashDialog, setShowTrashDialog] = useState(false);
@@ -204,7 +206,7 @@ export function Sidebar() {
    * Opens the system folder selection dialog and initializes the selected project.
    */
   const handleOpenFolder = useCallback(async () => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     const result = await api.openDirectory();
 
     if (!result.canceled && result.filePaths[0]) {
@@ -277,6 +279,27 @@ export function Sidebar() {
   // Register keyboard shortcuts
   useKeyboardShortcuts(navigationShortcuts);
 
+  const switchProjectSafely = useCallback(
+    async (targetProject: Project) => {
+      // Ensure .automaker directory structure exists before switching
+      const initResult = await initializeProject(targetProject.path);
+      if (!initResult.success) {
+        logger.error('Failed to initialize project during switch:', initResult.error);
+        toast.warning(
+          `Could not fully initialize project: ${initResult.error ?? 'Unknown error'}. Some features may not work correctly.`
+        );
+        // Continue with switch despite init failure — project may already be partially initialized
+      }
+
+      // Batch project switch + navigation to prevent multi-render cascades.
+      startTransition(() => {
+        setCurrentProject(targetProject);
+        navigate({ to: '/board' });
+      });
+    },
+    [setCurrentProject, navigate]
+  );
+
   // Keyboard shortcuts for project switching (1-9, 0)
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -301,15 +324,14 @@ export function Sidebar() {
       if (projectIndex !== null && projectIndex < projects.length) {
         const targetProject = projects[projectIndex];
         if (targetProject && targetProject.id !== currentProject?.id) {
-          setCurrentProject(targetProject);
-          navigate({ to: '/board' });
+          void switchProjectSafely(targetProject);
         }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [projects, currentProject, setCurrentProject, navigate]);
+  }, [projects, currentProject, switchProjectSafely]);
 
   const isActiveRoute = (id: string) => {
     const routePath = id === 'welcome' ? '/' : `/${id}`;
@@ -390,6 +412,7 @@ export function Sidebar() {
               onNewProject={handleNewProject}
               onOpenFolder={handleOpenFolder}
               onProjectContextMenu={handleContextMenu}
+              setShowRemoveFromAutomakerDialog={setShowRemoveFromAutomakerDialog}
             />
           )}
 
@@ -486,6 +509,14 @@ export function Sidebar() {
           onOpenChange={setShowDeleteProjectDialog}
           project={currentProject}
           onConfirm={moveProjectToTrash}
+        />
+
+        {/* Remove from Automaker Confirmation Dialog */}
+        <RemoveFromAutomakerDialog
+          open={showRemoveFromAutomakerDialog}
+          onOpenChange={setShowRemoveFromAutomakerDialog}
+          project={currentProject}
+          onConfirm={removeProject}
         />
 
         {/* New Project Modal */}

@@ -3,7 +3,6 @@ import { createLogger } from '@automaker/utils/logger';
 import { toast } from 'sonner';
 
 const logger = createLogger('TrashOperations');
-import { getElectronAPI, type TrashedProject } from '@/lib/electron';
 
 interface UseTrashOperationsProps {
   restoreTrashedProject: (projectId: string) => void;
@@ -40,7 +39,7 @@ export function useTrashOperations({
     async (trashedProject: TrashedProject) => {
       setActiveTrashId(trashedProject.id);
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         if (!api.trashItem) {
           throw new Error('System Trash is not available in this build.');
         }

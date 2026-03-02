@@ -1,4 +1,3 @@
-import type { IssueComplexity } from '@/lib/electron';
 import { VALIDATION_STALENESS_HOURS } from './constants';
 
 /**

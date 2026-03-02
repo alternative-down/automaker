@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import type { CliStatus } from '../shared/types';
 import type { ClaudeAuthStatus } from '@/store/setup-store';
 import { AnthropicIcon } from '@/components/ui/provider-icon';
-import { getElectronAPI } from '@/lib/electron';
 import { toast } from 'sonner';
 
 interface CliStatusProps {
@@ -88,7 +87,7 @@ export function ClaudeCliStatus({ status, authStatus, isChecking, onRefresh }: C
   const handleSignIn = useCallback(async () => {
     setIsAuthenticating(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       // Check if authClaude method exists on the API
       const authClaude = (api.setup as Record<string, unknown> | undefined)?.authClaude as
         | (() => Promise<{ success: boolean; error?: string }>)
@@ -123,7 +122,7 @@ export function ClaudeCliStatus({ status, authStatus, isChecking, onRefresh }: C
   const handleSignOut = useCallback(async () => {
     setIsDeauthenticating(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       // Check if deauthClaude method exists on the API
       const deauthClaude = (api.setup as Record<string, unknown> | undefined)?.deauthClaude as
         | (() => Promise<{ success: boolean; error?: string }>)

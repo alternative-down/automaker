@@ -5,7 +5,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 
@@ -24,7 +23,7 @@ export function useIdeationPrompts() {
   return useQuery({
     queryKey: queryKeys.ideation.prompts(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.ideation?.getPrompts();
       if (!result?.success) {
         throw new Error(result?.error || 'Failed to fetch prompts');
@@ -49,7 +48,7 @@ export function useIdeas(projectPath: string | undefined) {
     queryKey: queryKeys.ideation.ideas(projectPath ?? ''),
     queryFn: async () => {
       if (!projectPath) throw new Error('No project path');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.ideation?.listIdeas(projectPath);
       if (!result?.success) {
         throw new Error(result?.error || 'Failed to fetch ideas');
@@ -73,7 +72,7 @@ export function useIdea(projectPath: string | undefined, ideaId: string | undefi
     queryKey: queryKeys.ideation.idea(projectPath ?? '', ideaId ?? ''),
     queryFn: async () => {
       if (!projectPath || !ideaId) throw new Error('Missing project path or idea ID');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.ideation?.getIdea(projectPath, ideaId);
       if (!result?.success) {
         throw new Error(result?.error || 'Failed to fetch idea');

@@ -12,7 +12,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Trash2, AlertTriangle, FileWarning } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { getElectronAPI } from '@/lib/electron';
 import { toast } from 'sonner';
 
 interface WorktreeInfo {
@@ -59,7 +58,7 @@ export function DeleteWorktreeDialog({
 
     setIsLoading(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api?.worktree?.delete) {
         toast.error('Worktree API not available');
         return;
@@ -72,9 +71,19 @@ export function DeleteWorktreeDialog({
             ? `Branch "${worktree.branch}" was also deleted`
             : `Branch "${worktree.branch}" was kept`,
         });
-        onDeleted(worktree, deleteBranch);
+        // Close the dialog first, then notify the parent.
+        // This ensures the dialog unmounts before the parent
+        // triggers potentially heavy state updates (feature branch
+        // resets, worktree refresh), reducing concurrent re-renders
+        // that can cascade into React error #185.
         onOpenChange(false);
         setDeleteBranch(false);
+        try {
+          onDeleted(worktree, deleteBranch);
+        } catch (error) {
+          // Prevent errors in onDeleted from propagating to the error boundary
+          console.error('onDeleted callback failed:', error);
+        }
       } else {
         toast.error('Failed to delete worktree', {
           description: result.error,

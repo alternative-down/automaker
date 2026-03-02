@@ -6,7 +6,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getElectronAPI, type RunningAgent } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 import { createSmartPollingInterval } from '@/hooks/use-event-recency';
@@ -35,7 +34,7 @@ export function useRunningAgents() {
   return useQuery({
     queryKey: queryKeys.runningAgents.all(),
     queryFn: async (): Promise<RunningAgentsResult> => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.runningAgents) {
         throw new Error('Running agents API not available');
       }

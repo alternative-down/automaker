@@ -3,7 +3,6 @@
  *
  * Security model:
  * - Web mode: User enters API key (shown on server console) to get HTTP-only session cookie
- * - Electron mode: Uses X-API-Key header (handled automatically via IPC)
  *
  * The session cookie is:
  * - HTTP-only: JavaScript cannot read it (protects against XSS)

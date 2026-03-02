@@ -13,7 +13,6 @@ import { Upload, X, ImageIcon } from 'lucide-react';
 import { useAppStore } from '@/store/app-store';
 import { getAuthenticatedImageUrl } from '@/lib/api-fetch';
 import { getHttpApiClient } from '@/lib/http-api-client';
-import type { Project } from '@/lib/electron';
 import { IconPicker } from './icon-picker';
 import { toast } from 'sonner';
 

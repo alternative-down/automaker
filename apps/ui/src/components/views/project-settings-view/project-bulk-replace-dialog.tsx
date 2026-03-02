@@ -18,7 +18,6 @@ import {
 } from '@/components/ui/select';
 import { ArrowRight, Cloud, Server, Check, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Project } from '@/lib/electron';
 import type {
   PhaseModelKey,
   PhaseModelEntry,

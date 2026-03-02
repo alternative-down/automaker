@@ -6,9 +6,9 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
+import type { Feature } from '@/store/app-store';
 
 /**
  * Start running a feature in auto mode
@@ -35,7 +35,7 @@ export function useStartFeature(projectPath: string) {
       useWorktrees?: boolean;
       worktreePath?: string;
     }) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.runFeature(
         projectPath,
@@ -77,7 +77,7 @@ export function useResumeFeature(projectPath: string) {
       featureId: string;
       useWorktrees?: boolean;
     }) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.resumeFeature(projectPath, featureId, useWorktrees);
       if (!result.success) {
@@ -117,7 +117,7 @@ export function useStopFeature() {
   return useMutation({
     mutationFn: async (input: string | { featureId: string; projectPath?: string }) => {
       const featureId = typeof input === 'string' ? input : input.featureId;
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.stopFeature(featureId);
       if (!result.success) {
@@ -153,15 +153,32 @@ export function useVerifyFeature(projectPath: string) {
 
   return useMutation({
     mutationFn: async (featureId: string) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.verifyFeature(projectPath, featureId);
       if (!result.success) {
         throw new Error(result.error || 'Failed to verify feature');
       }
-      return result;
+      return { ...result, featureId };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // If verification passed, optimistically update React Query cache
+      // to move the feature to 'verified' status immediately
+      if (data.passes) {
+        const previousFeatures = queryClient.getQueryData<Feature[]>(
+          queryKeys.features.all(projectPath)
+        );
+        if (previousFeatures) {
+          queryClient.setQueryData<Feature[]>(
+            queryKeys.features.all(projectPath),
+            previousFeatures.map((f) =>
+              f.id === data.featureId
+                ? { ...f, status: 'verified' as const, justFinishedAt: undefined }
+                : f
+            )
+          );
+        }
+      }
       queryClient.invalidateQueries({ queryKey: queryKeys.features.all(projectPath) });
     },
     onError: (error: Error) => {
@@ -199,7 +216,7 @@ export function useApprovePlan(projectPath: string) {
       editedPlan?: string;
       feedback?: string;
     }) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.approvePlan(
         projectPath,
@@ -250,7 +267,7 @@ export function useFollowUpFeature(projectPath: string) {
       imagePaths?: string[];
       useWorktrees?: boolean;
     }) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.followUpFeature(
         projectPath,
@@ -287,7 +304,7 @@ export function useCommitFeature(projectPath: string) {
 
   return useMutation({
     mutationFn: async (featureId: string) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.commitFeature(projectPath, featureId);
       if (!result.success) {
@@ -316,7 +333,7 @@ export function useCommitFeature(projectPath: string) {
 export function useAnalyzeProject() {
   return useMutation({
     mutationFn: async (projectPath: string) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.analyzeProject(projectPath);
       if (!result.success) {
@@ -346,7 +363,7 @@ export function useStartAutoMode(projectPath: string) {
 
   return useMutation({
     mutationFn: async (maxConcurrency?: number) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.start(projectPath, undefined, maxConcurrency);
       if (!result.success) {
@@ -377,7 +394,7 @@ export function useStopAutoMode(projectPath: string) {
 
   return useMutation({
     mutationFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.autoMode) throw new Error('AutoMode API not available');
       const result = await api.autoMode.stop(projectPath);
       if (!result.success) {

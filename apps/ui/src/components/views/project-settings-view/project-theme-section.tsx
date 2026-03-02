@@ -11,7 +11,6 @@ import {
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/app-store';
 import { FontSelector } from '@/components/shared';
-import type { Project } from '@/lib/electron';
 
 interface ProjectThemeSectionProps {
   project: Project;

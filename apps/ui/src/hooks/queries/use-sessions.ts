@@ -5,10 +5,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
-import type { SessionListItem } from '@/types/electron';
 
 /**
  * Fetch all sessions
@@ -25,7 +23,7 @@ export function useSessions(includeArchived = false) {
   return useQuery({
     queryKey: queryKeys.sessions.all(includeArchived),
     queryFn: async (): Promise<SessionListItem[]> => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.sessions) {
         throw new Error('Sessions API not available');
       }
@@ -50,7 +48,7 @@ export function useSessionHistory(sessionId: string | undefined) {
     queryKey: queryKeys.sessions.history(sessionId ?? ''),
     queryFn: async () => {
       if (!sessionId) throw new Error('No session ID');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.agent) {
         throw new Error('Agent API not available');
       }
@@ -79,7 +77,7 @@ export function useSessionQueue(sessionId: string | undefined) {
     queryKey: queryKeys.sessions.queue(sessionId ?? ''),
     queryFn: async () => {
       if (!sessionId) throw new Error('No session ID');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.agent) {
         throw new Error('Agent API not available');
       }

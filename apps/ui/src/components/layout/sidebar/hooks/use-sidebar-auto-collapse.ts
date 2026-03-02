@@ -36,13 +36,8 @@ export function useSidebarAutoCollapse({
   // Update Electron window minWidth when sidebar state changes
   // This ensures the window can't be resized smaller than what the kanban board needs
   useEffect(() => {
-    const electronAPI = (
       window as unknown as {
-        electronAPI?: { updateMinWidth?: (expanded: boolean) => Promise<void> };
       }
-    ).electronAPI;
-    if (electronAPI?.updateMinWidth) {
-      electronAPI.updateMinWidth(sidebarOpen);
     }
   }, [sidebarOpen]);
 }

@@ -10,7 +10,6 @@ import { useNavigate } from '@tanstack/react-router';
 import { createLogger } from '@automaker/utils/logger';
 import { useMultiProjectStatus } from '@/hooks/use-multi-project-status';
 import { useAppStore } from '@/store/app-store';
-import { isElectron, getElectronAPI } from '@/lib/electron';
 import { isMac } from '@/lib/utils';
 import { initializeProject } from '@/lib/project-init';
 import { getHttpApiClient } from '@/lib/http-api-client';
@@ -83,7 +82,7 @@ export function OverviewView() {
       if (configResult.success && configResult.configured) {
         setShowWorkspacePicker(true);
       } else {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         const result = await api.openDirectory();
 
         if (!result.canceled && result.filePaths[0]) {
@@ -94,7 +93,7 @@ export function OverviewView() {
       }
     } catch (error) {
       logger.error('[Overview] Failed to check workspace config:', error);
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.openDirectory();
 
       if (!result.canceled && result.filePaths[0]) {
@@ -117,7 +116,7 @@ export function OverviewView() {
     async (projectName: string, parentDir: string) => {
       setIsCreating(true);
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         const projectPath = `${parentDir}/${projectName}`;
 
         await api.mkdir(projectPath);
@@ -243,11 +242,11 @@ export function OverviewView() {
   );
 
   return (
-    <div className="flex-1 flex flex-col h-screen content-bg" data-testid="overview-view">
+    <div className="flex-1 flex flex-col h-full content-bg" data-testid="overview-view">
       {/* Header */}
       <header className="shrink-0 border-b border-border bg-glass backdrop-blur-md">
         {/* Electron titlebar drag region */}
-        {isElectron() && (
+        {false && (
           <div
             className={`absolute top-0 left-0 right-0 h-6 titlebar-drag-region z-40 pointer-events-none ${isMac ? 'pl-20' : ''}`}
             aria-hidden="true"

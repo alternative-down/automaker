@@ -21,7 +21,6 @@ import { cn } from '@/lib/utils';
 import { XtermLogViewer, type XtermLogViewerRef } from '@/components/ui/xterm-log-viewer';
 import { useTestLogs } from '@/hooks/use-test-logs';
 import { useIsMobile } from '@/hooks/use-media-query';
-import type { TestRunStatus } from '@/types/electron';
 
 // ============================================================================
 // Types
@@ -215,7 +214,7 @@ function TestLogsPanelContent({
   return (
     <>
       {/* Header */}
-      <DialogHeader className="shrink-0 px-4 py-3 border-b border-border/50 pr-12">
+      <DialogHeader className="shrink-0 px-4 py-3 border-b border-border/50 pr-12 dialog-compact-header-mobile">
         <div className="flex items-center justify-between">
           <DialogTitle className="flex items-center gap-2 text-base">
             <FlaskConical className="w-4 h-4 text-primary" />
@@ -410,7 +409,7 @@ export function TestLogsPanel({
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <DialogContent
-        className="w-full h-full max-w-full max-h-full sm:w-[70vw] sm:max-w-[900px] sm:max-h-[85vh] sm:h-auto sm:rounded-xl rounded-none flex flex-col gap-0 p-0 overflow-hidden"
+        className="w-full h-full max-w-full max-h-full sm:w-[70vw] sm:max-w-[900px] sm:max-h-[85vh] sm:h-auto sm:rounded-xl rounded-none flex flex-col gap-0 p-0 overflow-hidden dialog-fullscreen-mobile"
         data-testid="test-logs-panel"
         compact
       >

@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import { getHttpApiClient } from '@/lib/http-api-client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -42,8 +41,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-
-const logger = createLogger('ContextView');
 import { sanitizeFilename } from '@/lib/image-utils';
 import { Markdown } from '../ui/markdown';
 import {
@@ -53,6 +50,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
+
+const logger = createLogger('ContextView');
 
 interface ContextFile {
   name: string;
@@ -140,7 +139,7 @@ export function ContextView() {
     if (!contextPath) return { files: {} };
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const metadataPath = `${contextPath}/context-metadata.json`;
       const result = await api.readFile(metadataPath);
       if (result.success && result.content) {
@@ -159,7 +158,7 @@ export function ContextView() {
       if (!contextPath) return;
 
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         const metadataPath = `${contextPath}/context-metadata.json`;
         await api.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
       } catch (error) {
@@ -176,7 +175,7 @@ export function ContextView() {
 
     setIsLoading(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
 
       // Ensure context directory exists
       await api.mkdir(contextPath);
@@ -218,7 +217,7 @@ export function ContextView() {
   // Load selected file content
   const loadFileContent = useCallback(async (file: ContextFile) => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.readFile(file.path);
       if (result.success && result.content !== undefined) {
         setEditedContent(result.content);
@@ -245,7 +244,7 @@ export function ContextView() {
 
     setIsSaving(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       await api.writeFile(selectedFile.path, editedContent);
       setSelectedFile({ ...selectedFile, content: editedContent });
       setHasChanges(false);
@@ -340,7 +339,7 @@ export function ContextView() {
     setUploadingFileName(file.name);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const isImage = isImageFile(file.name);
 
       let filePath: string;
@@ -466,7 +465,7 @@ export function ContextView() {
     if (!contextPath || !newMarkdownName.trim()) return;
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       let filename = newMarkdownName.trim();
 
       // Add .md extension if not provided
@@ -512,7 +511,7 @@ export function ContextView() {
     if (!selectedFile) return;
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       await api.deleteFile(selectedFile.path);
 
       // Remove from metadata
@@ -542,7 +541,7 @@ export function ContextView() {
     }
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const newPath = `${contextPath}/${newName}`;
 
       // Check if file with new name already exists
@@ -628,7 +627,7 @@ export function ContextView() {
   // Delete file from list (used by dropdown)
   const handleDeleteFromList = async (file: ContextFile) => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       await api.deleteFile(file.path);
 
       // Remove from metadata
@@ -973,7 +972,7 @@ export function ContextView() {
               </div>
 
               {/* Content area */}
-              <div className="flex-1 overflow-hidden px-4 pb-4">
+              <div className="flex-1 overflow-hidden px-4 pb-2 sm:pb-4">
                 {selectedFile.type === 'image' ? (
                   <div
                     className="h-full flex items-center justify-center bg-card rounded-lg"

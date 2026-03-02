@@ -3,7 +3,6 @@ import { ProviderFactory } from '@/providers/provider-factory.js';
 import { ClaudeProvider } from '@/providers/claude-provider.js';
 import { CursorProvider } from '@/providers/cursor-provider.js';
 import { CodexProvider } from '@/providers/codex-provider.js';
-import { OpencodeProvider } from '@/providers/opencode-provider.js';
 import { GeminiProvider } from '@/providers/gemini-provider.js';
 import { CopilotProvider } from '@/providers/copilot-provider.js';
 
@@ -54,13 +53,13 @@ describe('provider-factory.ts', () => {
 
   describe('getProviderForModel', () => {
     describe('Claude models (claude-* prefix)', () => {
-      it('should return ClaudeProvider for claude-opus-4-5-20251101', () => {
-        const provider = ProviderFactory.getProviderForModel('claude-opus-4-5-20251101');
+      it('should return ClaudeProvider for claude-opus-4-6', () => {
+        const provider = ProviderFactory.getProviderForModel('claude-opus-4-6');
         expect(provider).toBeInstanceOf(ClaudeProvider);
       });
 
-      it('should return ClaudeProvider for claude-sonnet-4-20250514', () => {
-        const provider = ProviderFactory.getProviderForModel('claude-sonnet-4-20250514');
+      it('should return ClaudeProvider for claude-sonnet-4-6', () => {
+        const provider = ProviderFactory.getProviderForModel('claude-sonnet-4-6');
         expect(provider).toBeInstanceOf(ClaudeProvider);
       });
 
@@ -70,7 +69,7 @@ describe('provider-factory.ts', () => {
       });
 
       it('should be case-insensitive for claude models', () => {
-        const provider = ProviderFactory.getProviderForModel('CLAUDE-OPUS-4-5-20251101');
+        const provider = ProviderFactory.getProviderForModel('CLAUDE-OPUS-4-6');
         expect(provider).toBeInstanceOf(ClaudeProvider);
       });
     });
@@ -229,7 +228,6 @@ describe('provider-factory.ts', () => {
       expect(keys).toContain('claude');
       expect(keys).toContain('cursor');
       expect(keys).toContain('codex');
-      expect(keys).toContain('opencode');
       expect(keys).toContain('gemini');
       expect(keys).toContain('copilot');
       expect(keys).toHaveLength(6);

@@ -46,6 +46,8 @@ export {
   useCommitWorktree,
   usePushWorktree,
   usePullWorktree,
+  useSyncWorktree,
+  useSetTracking,
   useCreatePullRequest,
   useMergeWorktree,
   useSwitchBranch,
@@ -62,6 +64,7 @@ export {
   useValidateIssue,
   useMarkValidationViewed,
   useGetValidationStatus,
+  useResolveReviewThread,
 } from './use-github-mutations';
 
 // Ideation mutations
@@ -74,6 +77,3 @@ export {
   useGenerateFeatures,
   useSaveSpec,
 } from './use-spec-mutations';
-
-// Cursor Permissions mutations
-export { useApplyCursorProfile, useCopyCursorConfig } from './use-cursor-permissions-mutations';

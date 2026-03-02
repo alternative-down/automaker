@@ -6,9 +6,8 @@
  */
 
 import { useState, useCallback, useEffect } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient, useIsRestoring } from '@tanstack/react-query';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import { toast } from 'sonner';
 import { createLogger } from '@automaker/utils/logger';
 import { useFeatures } from '@/hooks/queries';
@@ -24,19 +23,30 @@ export function useBoardFeatures({ currentProject }: UseBoardFeaturesProps) {
   const queryClient = useQueryClient();
   const [persistedCategories, setPersistedCategories] = useState<string[]>([]);
 
+  // Track whether React Query's IDB persistence layer is still restoring.
+  // During the restore window (~100-500ms on mobile), queries report
+  // isLoading=true because no data is in the cache yet. We suppress
+  // the full-screen spinner during this period to avoid a visible flash
+  // on PWA memory-eviction cold starts.
+  const isRestoring = useIsRestoring();
+
   // Use React Query for features
   const {
     data: features = [],
-    isLoading,
+    isLoading: isQueryLoading,
     refetch: loadFeatures,
   } = useFeatures(currentProject?.path);
+
+  // Don't report loading while IDB cache restore is in progress —
+  // features will appear momentarily once the restore completes.
+  const isLoading = isQueryLoading && !isRestoring;
 
   // Load persisted categories from file
   const loadCategories = useCallback(async () => {
     if (!currentProject) return;
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.readFile(`${currentProject.path}/.automaker/categories.json`);
 
       if (result.success && result.content) {
@@ -58,7 +68,7 @@ export function useBoardFeatures({ currentProject }: UseBoardFeaturesProps) {
       if (!currentProject || !category.trim()) return;
 
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         let categories: string[] = [...persistedCategories];
 
         if (!categories.includes(category)) {
@@ -82,7 +92,7 @@ export function useBoardFeatures({ currentProject }: UseBoardFeaturesProps) {
   // Subscribe to auto mode events for notifications (ding sound, toasts)
   // Note: Query invalidation is handled by useAutoModeQueryInvalidation in the root
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.autoMode || !currentProject) return;
 
     const { removeRunningTask } = useAppStore.getState();
@@ -157,7 +167,7 @@ export function useBoardFeatures({ currentProject }: UseBoardFeaturesProps) {
     if (!currentProject) return;
 
     const checkInterrupted = async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (api.autoMode?.resumeInterrupted) {
         try {
           await api.autoMode.resumeInterrupted(currentProject.path);

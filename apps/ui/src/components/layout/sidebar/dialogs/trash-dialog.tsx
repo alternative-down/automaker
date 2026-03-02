@@ -11,7 +11,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { DeleteConfirmDialog } from '@/components/ui/delete-confirm-dialog';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import type { TrashedProject } from '@/lib/electron';
 
 interface TrashDialogProps {
   open: boolean;

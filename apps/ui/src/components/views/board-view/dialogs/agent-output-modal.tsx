@@ -8,7 +8,6 @@ import {
 } from '@/components/ui/dialog';
 import { List, FileText, GitBranch, ClipboardList } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
-import { getElectronAPI } from '@/lib/electron';
 import { LogViewer } from '@/components/ui/log-viewer';
 import { GitDiffPanel } from '@/components/ui/git-diff-panel';
 import { TaskProgressPanel } from '@/components/ui/task-progress-panel';
@@ -16,7 +15,6 @@ import { Markdown } from '@/components/ui/markdown';
 import { useAppStore } from '@/store/app-store';
 import { extractSummary } from '@/lib/log-parser';
 import { useAgentOutput } from '@/hooks/queries';
-import type { AutoModeEvent } from '@/types/electron';
 import type { BacklogPlanEvent } from '@automaker/types';
 
 interface AgentOutputModalProps {
@@ -90,7 +88,7 @@ export function AgentOutputModal({
   useEffect(() => {
     if (!open) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.autoMode || isBacklogPlan) return;
 
     console.log('[AgentOutputModal] Subscribing to events for featureId:', featureId);
@@ -258,7 +256,7 @@ export function AgentOutputModal({
   useEffect(() => {
     if (!open || !isBacklogPlan) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.backlogPlan) return;
 
     const unsubscribe = api.backlogPlan.onEvent((data: unknown) => {
@@ -321,11 +319,11 @@ export function AgentOutputModal({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
-        className="w-full h-full max-w-full max-h-full sm:w-[60vw] sm:max-w-[60vw] sm:max-h-[80vh] sm:h-auto sm:rounded-xl rounded-none flex flex-col"
+        className="w-full max-h-[85dvh] max-w-[calc(100%-2rem)] sm:w-[60vw] sm:max-w-[60vw] sm:max-h-[80vh] rounded-xl flex flex-col"
         data-testid="agent-output-modal"
       >
         <DialogHeader className="shrink-0">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pr-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pr-10">
             <DialogTitle className="flex items-center gap-2">
               {featureStatus !== 'verified' && featureStatus !== 'waiting_approval' && (
                 <Spinner size="md" />

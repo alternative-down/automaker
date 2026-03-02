@@ -7,10 +7,8 @@ const PROVIDER_ICON_KEYS = {
   anthropic: 'anthropic',
   openai: 'openai',
   openrouter: 'openrouter',
-  cursor: 'cursor',
   gemini: 'gemini',
   grok: 'grok',
-  opencode: 'opencode',
   deepseek: 'deepseek',
   qwen: 'qwen',
   nova: 'nova',
@@ -19,7 +17,6 @@ const PROVIDER_ICON_KEYS = {
   minimax: 'minimax',
   glm: 'glm',
   bigpickle: 'bigpickle',
-  copilot: 'copilot',
 } as const;
 
 type ProviderIconKey = keyof typeof PROVIDER_ICON_KEYS;
@@ -49,12 +46,6 @@ const PROVIDER_ICON_DEFINITIONS: Record<ProviderIconKey, ProviderIconDefinition>
     path: 'M16.778 1.844v1.919q-.569-.026-1.138-.032-.708-.008-1.415.037c-1.93.126-4.023.728-6.149 2.237-2.911 2.066-2.731 1.95-4.14 2.75-.396.223-1.342.574-2.185.798-.841.225-1.753.333-1.751.333v4.229s.768.108 1.61.333c.842.224 1.789.575 2.185.799 1.41.798 1.228.683 4.14 2.75 2.126 1.509 4.22 2.11 6.148 2.236.88.058 1.716.041 2.555.005v1.918l7.222-4.168-7.222-4.17v2.176c-.86.038-1.611.065-2.278.021-1.364-.09-2.417-.357-3.979-1.465-2.244-1.593-2.866-2.027-3.68-2.508.889-.518 1.449-.906 3.822-2.59 1.56-1.109 2.614-1.377 3.978-1.466.667-.044 1.418-.017 2.278.02v2.176L24 6.014Z',
     fill: '#94A3B8',
   },
-  cursor: {
-    viewBox: '0 0 512 512',
-    // Official Cursor logo - hexagonal shape with triangular wedge
-    path: 'M415.035 156.35l-151.503-87.4695c-4.865-2.8094-10.868-2.8094-15.733 0l-151.4969 87.4695c-4.0897 2.362-6.6146 6.729-6.6146 11.459v176.383c0 4.73 2.5249 9.097 6.6146 11.458l151.5039 87.47c4.865 2.809 10.868 2.809 15.733 0l151.504-87.47c4.089-2.361 6.614-6.728 6.614-11.458v-176.383c0-4.73-2.525-9.097-6.614-11.459zm-9.516 18.528l-146.255 253.32c-.988 1.707-3.599 1.01-3.599-.967v-165.872c0-3.314-1.771-6.379-4.644-8.044l-143.645-82.932c-1.707-.988-1.01-3.599.968-3.599h292.509c4.154 0 6.75 4.503 4.673 8.101h-.007z',
-    fill: '#5E9EFF',
-  },
   gemini: {
     viewBox: '0 0 192 192',
     // Official Google Gemini sparkle logo from gemini.google.com
@@ -65,9 +56,7 @@ const PROVIDER_ICON_DEFINITIONS: Record<ProviderIconKey, ProviderIconDefinition>
     // Official Grok/xAI logo - stylized symbol from grok.com
     path: 'M213.235 306.019l178.976-180.002v.169l51.695-51.763c-.924 1.32-1.86 2.605-2.785 3.89-39.281 54.164-58.46 80.649-43.07 146.922l-.09-.101c10.61 45.11-.744 95.137-37.398 131.836-46.216 46.306-120.167 56.611-181.063 14.928l42.462-19.675c38.863 15.278 81.392 8.57 111.947-22.03 30.566-30.6 37.432-75.159 22.065-112.252-2.92-7.025-11.67-8.795-17.792-4.263l-124.947 92.341zm-25.786 22.437l-.033.034L68.094 435.217c7.565-10.429 16.957-20.294 26.327-30.149 26.428-27.803 52.653-55.359 36.654-94.302-21.422-52.112-8.952-113.177 30.724-152.898 41.243-41.254 101.98-51.661 152.706-30.758 11.23 4.172 21.016 10.114 28.638 15.639l-42.359 19.584c-39.44-16.563-84.629-5.299-112.207 22.313-37.298 37.308-44.84 102.003-1.128 143.81z',
   },
-  opencode: {
     viewBox: '0 0 512 512',
-    // Official OpenCode favicon - geometric icon from opencode.ai
     path: 'M384 416H128V96H384V416ZM320 160H192V352H320V160Z',
     fillRule: 'evenodd',
     fill: '#6366F1',
@@ -105,19 +94,15 @@ const PROVIDER_ICON_DEFINITIONS: Record<ProviderIconKey, ProviderIconDefinition>
   },
   glm: {
     viewBox: '0 0 24 24',
-    // Official Z.ai logo from lobehub/lobe-icons (GLM provider)
+    // Official Z.ai/GLM logo from lobehub/lobe-icons (GLM/Zhipu provider)
     path: 'M12.105 2L9.927 4.953H.653L2.83 2h9.276zM23.254 19.048L21.078 22h-9.242l2.174-2.952h9.244zM24 2L9.264 22H0L14.736 2H24z',
+    fill: '#3B82F6', // z.ai brand blue
   },
   bigpickle: {
     viewBox: '0 0 24 24',
     // Big Pickle logo - stylized shape with dots
     path: 'M8 4c-2.21 0-4 1.79-4 4v8c0 2.21 1.79 4 4 4h8c2.21 0 4-1.79 4-4V8c0-2.21-1.79-4-4-4H8zm0 2h8c1.103 0 2 .897 2 2v8c0 1.103-.897 2-2 2H8c-1.103 0-2-.897-2-2V8c0-1.103.897-2 2-2zm2 3a1 1 0 100 2 1 1 0 000-2zm4 0a1 1 0 100 2 1 1 0 000-2zm-4 4a1 1 0 100 2 1 1 0 000-2zm4 0a1 1 0 100 2 1 1 0 000-2z',
     fill: '#4ADE80',
-  },
-  copilot: {
-    viewBox: '0 0 98 96',
-    // Official GitHub Octocat logo mark (theme-aware via currentColor)
-    path: 'M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z',
   },
 };
 
@@ -168,10 +153,6 @@ export function OpenRouterIcon(props: Omit<ProviderIconProps, 'provider'>) {
   return <ProviderIcon provider={PROVIDER_ICON_KEYS.openrouter} {...props} />;
 }
 
-export function CursorIcon(props: Omit<ProviderIconProps, 'provider'>) {
-  return <ProviderIcon provider={PROVIDER_ICON_KEYS.cursor} {...props} />;
-}
-
 const GEMINI_ICON_URL = new URL('../../assets/icons/gemini-icon.svg', import.meta.url).toString();
 const GEMINI_ICON_ALT = 'Gemini';
 
@@ -204,16 +185,8 @@ export function GeminiIcon({ title, className, ...props }: GeminiIconProps) {
   );
 }
 
-export function CopilotIcon(props: Omit<ProviderIconProps, 'provider'>) {
-  return <ProviderIcon provider={PROVIDER_ICON_KEYS.copilot} {...props} />;
-}
-
 export function GrokIcon(props: Omit<ProviderIconProps, 'provider'>) {
   return <ProviderIcon provider={PROVIDER_ICON_KEYS.grok} {...props} />;
-}
-
-export function OpenCodeIcon(props: Omit<ProviderIconProps, 'provider'>) {
-  return <ProviderIcon provider={PROVIDER_ICON_KEYS.opencode} {...props} />;
 }
 
 export function DeepSeekIcon({
@@ -391,11 +364,14 @@ export function GlmIcon({ className, title, ...props }: { className?: string; ti
       {title && <title>{title}</title>}
       <path
         d="M12.105 2L9.927 4.953H.653L2.83 2h9.276zM23.254 19.048L21.078 22h-9.242l2.174-2.952h9.244zM24 2L9.264 22H0L14.736 2H24z"
-        fill="currentColor"
+        fill="#3B82F6"
       />
     </svg>
   );
 }
+
+// Z.ai icon is the same as GLM (Zhipu AI)
+export const ZaiIcon = GlmIcon;
 
 export function BigPickleIcon({
   className,
@@ -430,11 +406,8 @@ export const PROVIDER_ICON_COMPONENTS: Record<
   ComponentType<{ className?: string }>
 > = {
   claude: AnthropicIcon,
-  cursor: CursorIcon,
   codex: OpenAIIcon,
-  opencode: OpenCodeIcon,
   gemini: GeminiIcon,
-  copilot: CopilotIcon,
 };
 
 /**
@@ -451,7 +424,7 @@ function getUnderlyingModelIcon(model?: AgentModel | string): ProviderIconKey {
     return 'openrouter';
   }
 
-  // Check for Amazon Bedrock models first (amazon-bedrock/...)
+  // Check for Amazon Bedrock models (amazon-bedrock/...)
   if (modelStr.startsWith('amazon-bedrock/')) {
     // Bedrock-hosted models - detect the specific provider
     if (modelStr.includes('anthropic') || modelStr.includes('claude')) {
@@ -472,13 +445,9 @@ function getUnderlyingModelIcon(model?: AgentModel | string): ProviderIconKey {
     if (modelStr.includes('qwen')) {
       return 'qwen';
     }
-    // Default for unknown Bedrock models
-    return 'opencode';
   }
 
-  // Check for native OpenCode models (opencode/...)
-  if (modelStr.startsWith('opencode/')) {
-    // Native OpenCode models - check specific model types
+    // Check for specific model types
     if (modelStr.includes('big-pickle')) {
       return 'bigpickle';
     }
@@ -489,17 +458,14 @@ function getUnderlyingModelIcon(model?: AgentModel | string): ProviderIconKey {
       return 'glm';
     }
     if (modelStr.includes('gpt-5-nano') || modelStr.includes('nano')) {
-      return 'openai'; // GPT-5 Nano uses OpenAI icon
+      return 'openai';
     }
     if (modelStr.includes('minimax')) {
       return 'minimax';
     }
-    // Default for other OpenCode models
-    return 'opencode';
   }
 
-  // Check for dynamic OpenCode provider models (provider/model format)
-  // e.g., zai-coding-plan/glm-4.5, github-copilot/gpt-4o, google/gemini-2.5-pro
+  // Check for provider/model format patterns (provider/model)
   // Only handle strings with exactly one slash (not URLs or paths)
   if (!modelStr.includes('://')) {
     const slashIndex = modelStr.indexOf('/');
@@ -558,7 +524,6 @@ function getUnderlyingModelIcon(model?: AgentModel | string): ProviderIconKey {
           return 'grok';
         }
         // Default for unknown dynamic models
-        return 'opencode';
       }
     }
   }
@@ -572,7 +537,7 @@ function getUnderlyingModelIcon(model?: AgentModel | string): ProviderIconKey {
     return 'minimax';
   }
 
-  // Check for Cursor-specific models with underlying providers
+  // Check for known model patterns with underlying providers
   if (modelStr.includes('sonnet') || modelStr.includes('opus') || modelStr.includes('claude')) {
     return 'anthropic';
   }
@@ -585,28 +550,9 @@ function getUnderlyingModelIcon(model?: AgentModel | string): ProviderIconKey {
   if (modelStr.includes('grok')) {
     return 'grok';
   }
-  // GitHub Copilot models
-  if (modelStr.includes('copilot')) {
-    return 'copilot';
-  }
-  // Cursor models - canonical format includes 'cursor-' prefix
-  // Also support legacy IDs for backward compatibility
-  if (
-    modelStr.includes('cursor') ||
-    modelStr === 'auto' ||
-    modelStr === 'composer-1' ||
-    modelStr === 'cursor-auto' ||
-    modelStr === 'cursor-composer-1'
-  ) {
-    return 'cursor';
-  }
-
   // Default based on provider
   const provider = getProviderFromModel(model);
   if (provider === 'codex') return 'openai';
-  if (provider === 'cursor') return 'cursor';
-  if (provider === 'opencode') return 'opencode';
-  if (provider === 'copilot') return 'copilot';
   return 'anthropic';
 }
 
@@ -619,10 +565,8 @@ export function getProviderIconForModel(
     anthropic: AnthropicIcon,
     openai: OpenAIIcon,
     openrouter: OpenRouterIcon,
-    cursor: CursorIcon,
     gemini: GeminiIcon,
     grok: GrokIcon,
-    opencode: OpenCodeIcon,
     deepseek: DeepSeekIcon,
     qwen: QwenIcon,
     nova: NovaIcon,
@@ -631,7 +575,6 @@ export function getProviderIconForModel(
     minimax: MiniMaxIcon,
     glm: GlmIcon,
     bigpickle: BigPickleIcon,
-    copilot: CopilotIcon,
   };
 
   return iconMap[iconKey] || AnthropicIcon;

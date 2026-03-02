@@ -5,7 +5,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 import { getGlobalEventsRecent } from '@/hooks/use-event-recency';
@@ -40,7 +39,7 @@ export function useSpecFile(projectPath: string | undefined) {
     queryFn: async (): Promise<SpecFileResult> => {
       if (!projectPath) throw new Error('No project path');
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.readFile(`${projectPath}/.automaker/app_spec.txt`);
 
       if (result.success && result.content) {
@@ -81,7 +80,7 @@ export function useSpecRegenerationStatus(projectPath: string | undefined, enabl
     queryFn: async (): Promise<SpecRegenerationStatusResult> => {
       if (!projectPath) throw new Error('No project path');
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.specRegeneration) {
         return { isRunning: false };
       }

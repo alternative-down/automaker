@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/select';
 import { Bot, Cloud, Server, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Project } from '@/lib/electron';
 
 interface ProjectClaudeSectionProps {
   project: Project;

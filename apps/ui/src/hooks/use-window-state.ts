@@ -8,7 +8,7 @@ export interface WindowState {
 
 /**
  * Hook to track window state (dimensions and maximized status)
- * For Electron apps, considers window maximized if width > 1400px
+ * Considers window maximized if width > 1400px
  * Also listens for window resize events to update state
  */
 export function useWindowState(): WindowState {
@@ -38,12 +38,8 @@ export function useWindowState(): WindowState {
       });
     };
 
-    // Set initial state
     updateWindowState();
-
-    // Listen for resize events
     window.addEventListener('resize', updateWindowState);
-
     return () => {
       window.removeEventListener('resize', updateWindowState);
     };

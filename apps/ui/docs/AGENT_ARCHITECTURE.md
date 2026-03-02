@@ -45,7 +45,6 @@ The agent now runs in the **Electron main process** instead of Next.js API route
 
 ## Key Components
 
-### 1. Agent Service (`electron/agent-service.js`)
 
 The core service running in the Electron main process:
 
@@ -55,7 +54,6 @@ The core service running in the Electron main process:
 - **Tool Support**: Full Read/Write/Edit/Bash/Grep/Glob capabilities
 - **Error Recovery**: Continues after errors, saves state
 
-### 2. IPC Handlers (`electron/main.js`)
 
 Electron main process handlers:
 
@@ -66,17 +64,12 @@ Electron main process handlers:
 - `agent:clear` - Clear conversation
 - `agent:stream` - Event emitted for streaming updates
 
-### 3. Preload Bridge (`electron/preload.js`)
 
 Secure IPC bridge exposed to renderer:
 
 ```javascript
-window.electronAPI.agent.start(sessionId, workingDir);
-window.electronAPI.agent.send(sessionId, message, workingDir);
-window.electronAPI.agent.onStream(callback);
 ```
 
-### 4. React Hook (`src/hooks/use-electron-agent.ts`)
 
 Easy-to-use React hook:
 
@@ -110,7 +103,6 @@ Updated to use IPC instead of HTTP:
 ### Sending a Message
 
 1. User types message in React UI
-2. `sendMessage()` calls `window.electronAPI.agent.send()`
 3. IPC handler in main process receives message
 4. Agent service starts processing
 5. Main process streams updates via `agent:stream` events
@@ -199,7 +191,7 @@ The agent is configured with:
 
 ```javascript
 {
-  model: "claude-opus-4-5-20251101",
+  model: "claude-opus-4-6",
   maxTurns: 20,
   cwd: workingDirectory,
   allowedTools: [
@@ -271,7 +263,6 @@ To test the architecture:
 
 ### Next.js restart kills agent
 
-- Verify agent service is in `electron/main.js`
 - Check IPC handlers are registered
 - Ensure not using HTTP `/api/chat` route
 

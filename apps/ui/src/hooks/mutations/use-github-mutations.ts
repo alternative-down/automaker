@@ -5,7 +5,6 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getElectronAPI, GitHubIssue, GitHubComment } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { LinkedPRInfo, ModelId, ThinkingLevel, ReasoningEffort } from '@automaker/types';
@@ -49,7 +48,7 @@ export function useValidateIssue(projectPath: string) {
     mutationFn: async (input: ValidateIssueInput) => {
       const { issue, model, thinkingLevel, reasoningEffort, comments, linkedPRs } = input;
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.github?.validateIssue) {
         throw new Error('Validation API not available');
       }
@@ -112,7 +111,7 @@ export function useMarkValidationViewed(projectPath: string) {
 
   return useMutation({
     mutationFn: async (issueNumber: number) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.github?.markValidationViewed) {
         throw new Error('Mark viewed API not available');
       }
@@ -136,6 +135,55 @@ export function useMarkValidationViewed(projectPath: string) {
 }
 
 /**
+ * Resolve or unresolve a PR review thread
+ *
+ * @param projectPath - Path to the project
+ * @param prNumber - PR number (for cache invalidation)
+ * @returns Mutation for resolving/unresolving a review thread
+ *
+ * @example
+ * ```tsx
+ * const resolveThread = useResolveReviewThread(projectPath, prNumber);
+ * resolveThread.mutate({ threadId: comment.threadId, resolve: true });
+ * ```
+ */
+export function useResolveReviewThread(projectPath: string, prNumber: number) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ threadId, resolve }: { threadId: string; resolve: boolean }) => {
+      const api = getHttpApiClient();
+      if (!api.github?.resolveReviewThread) {
+        throw new Error('Resolve review thread API not available');
+      }
+
+      const result = await api.github.resolveReviewThread(projectPath, threadId, resolve);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to resolve review thread');
+      }
+
+      return { isResolved: result.isResolved ?? resolve };
+    },
+    onSuccess: (_, variables) => {
+      const action = variables.resolve ? 'resolved' : 'unresolved';
+      toast.success(`Comment ${action}`, {
+        description: `The review thread has been ${action} on GitHub`,
+      });
+      // Invalidate the PR review comments cache to reflect updated resolved status
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.github.prReviewComments(projectPath, prNumber),
+      });
+    },
+    onError: (error) => {
+      toast.error('Failed to update comment', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      });
+    },
+  });
+}
+
+/**
  * Get running validation status
  *
  * @param projectPath - Path to the project
@@ -144,7 +192,7 @@ export function useMarkValidationViewed(projectPath: string) {
 export function useGetValidationStatus(projectPath: string) {
   return useMutation({
     mutationFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.github?.getValidationStatus) {
         throw new Error('Validation status API not available');
       }

@@ -5,7 +5,6 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 
@@ -38,7 +37,7 @@ export function useUpdateGlobalSettings(options: UpdateGlobalSettingsOptions = {
 
   return useMutation({
     mutationFn: async (settings: Record<string, unknown>) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }
@@ -101,7 +100,7 @@ export function useUpdateProjectSettings(projectPath?: string) {
         throw new Error('Project path is required');
       }
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }
@@ -136,7 +135,7 @@ export function useSaveCredentials() {
 
   return useMutation({
     mutationFn: async (credentials: { anthropic?: string; google?: string; openai?: string }) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.settings) {
         throw new Error('Settings API not available');
       }

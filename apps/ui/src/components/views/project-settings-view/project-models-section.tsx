@@ -3,7 +3,6 @@ import { useAppStore } from '@/store/app-store';
 import { Button } from '@/components/ui/button';
 import { Workflow, RotateCcw, Globe, Check, Replace, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { Project } from '@/lib/electron';
 import { PhaseModelSelector } from '@/components/views/settings-view/model-defaults/phase-model-selector';
 import { ProjectBulkReplaceDialog } from './project-bulk-replace-dialog';
 import type { PhaseModelKey, PhaseModelEntry } from '@automaker/types';

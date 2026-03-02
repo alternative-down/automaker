@@ -3,7 +3,6 @@ import { Folder, LucideIcon } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import { cn, sanitizeForTestId } from '@/lib/utils';
 import { getAuthenticatedImageUrl } from '@/lib/api-fetch';
-import type { Project } from '@/lib/electron';
 
 interface ProjectSwitcherItemProps {
   project: Project;

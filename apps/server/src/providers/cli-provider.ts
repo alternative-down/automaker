@@ -11,13 +11,10 @@
  * @example
  * ```typescript
  * class CursorProvider extends CliProvider {
- *   getCliName(): string { return 'cursor-agent'; }
  *   getSpawnConfig(): CliSpawnConfig {
  *     return {
  *       windowsStrategy: 'wsl',
  *       commonPaths: {
- *         linux: ['~/.local/bin/cursor-agent'],
- *         darwin: ['~/.local/bin/cursor-agent'],
  *       }
  *     };
  *   }
@@ -48,7 +45,6 @@ import type { ExecuteOptions, ProviderConfig, ProviderMessage } from './types.js
  * Spawn strategy for CLI tools on Windows
  *
  * Different CLI tools require different execution strategies:
- * - 'wsl': Requires WSL, CLI only available on Linux/macOS (e.g., cursor-agent)
  * - 'npx': Installed globally via npm/npx, use `npx <package>` to run
  * - 'direct': Native Windows binary, can spawn directly
  * - 'cmd': Windows batch file (.cmd/.bat), needs cmd.exe shell
@@ -147,7 +143,6 @@ export abstract class CliProvider extends BaseProvider {
   // ==========================================================================
 
   /**
-   * Get the CLI executable name (e.g., 'cursor-agent', 'aider')
    */
   abstract getCliName(): string;
 

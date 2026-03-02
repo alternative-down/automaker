@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import type { Project } from '@/lib/electron';
 import type { NavigationItem } from '../config/navigation';
 import { GLOBAL_NAV_GROUPS } from '../config/navigation';
 import type { SettingsViewId } from '../hooks/use-settings-view';
@@ -16,7 +15,6 @@ const NAV_ID_TO_PROVIDER: Record<string, ModelProvider> = {
   'claude-provider': 'claude',
   'cursor-provider': 'cursor',
   'codex-provider': 'codex',
-  'opencode-provider': 'opencode',
   'gemini-provider': 'gemini',
   'copilot-provider': 'copilot',
 };

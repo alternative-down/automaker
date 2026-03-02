@@ -12,14 +12,12 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 import { pathsEqual } from '@/lib/utils';
 import type {
   TestRunStatus,
   TestRunnerStartedEvent,
   TestRunnerOutputEvent,
   TestRunnerCompletedEvent,
-} from '@/types/electron';
 
 const logger = createLogger('TestLogs');
 
@@ -146,7 +144,7 @@ export function useTestLogs({
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api?.worktree?.getTestLogs) {
         // Check if this request is still current
         if (seq !== fetchSeq.current) return;
@@ -239,7 +237,7 @@ export function useTestLogs({
     if (!autoSubscribe) return;
     if (!worktreePath && !targetSessionId) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.worktree?.onTestRunnerEvent) {
       logger.warn('Test runner event subscription not available');
       return;
@@ -368,7 +366,7 @@ export function useTestLogEvents(handlers: {
   const { onStarted, onOutput, onCompleted } = handlers;
 
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api?.worktree?.onTestRunnerEvent) {
       logger.warn('Test runner event subscription not available');
       return;

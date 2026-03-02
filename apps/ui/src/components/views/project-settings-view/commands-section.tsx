@@ -6,7 +6,6 @@ import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { useProjectSettings } from '@/hooks/queries';
 import { useUpdateProjectSettings } from '@/hooks/mutations';
-import type { Project } from '@/lib/electron';
 
 /** Preset dev server commands for quick selection */
 const DEV_SERVER_PRESETS = [

@@ -7,9 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useQueryClient, QueryClient } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
-import type { AutoModeEvent, SpecRegenerationEvent, StreamEvent } from '@/types/electron';
 import type { IssueValidationEvent } from '@automaker/types';
 import { debounce, type DebouncedFunction } from '@automaker/utils/debounce';
 import { useEventRecencyStore } from './use-event-recency';
@@ -28,22 +26,27 @@ const PROGRESS_DEBOUNCE_MAX_WAIT = 2000;
  * feature moving to custom pipeline columns (fixes GitHub issue #668)
  */
 const FEATURE_LIST_INVALIDATION_EVENTS: AutoModeEvent['type'][] = [
+  'auto_mode_feature_start',
   'auto_mode_feature_complete',
   'auto_mode_error',
+  'auto_mode_started',
+  'auto_mode_stopped',
   'plan_approval_required',
   'plan_approved',
   'plan_rejected',
   'pipeline_step_started',
   'pipeline_step_complete',
+  'feature_status_changed',
+  'features_reconciled',
 ];
 
 /**
  * Events that should invalidate a specific feature (features.single query)
- * Note: pipeline_step_started is NOT included here because it already invalidates
- * features.all() above, which also invalidates child queries (features.single)
+ * Note: auto_mode_feature_start and pipeline_step_started are NOT included here
+ * because they already invalidate features.all() above, which also invalidates
+ * child queries (features.single)
  */
 const SINGLE_FEATURE_INVALIDATION_EVENTS: AutoModeEvent['type'][] = [
-  'auto_mode_feature_start',
   'auto_mode_phase',
   'auto_mode_phase_complete',
   'auto_mode_task_status',
@@ -164,7 +167,7 @@ export function useAutoModeQueryInvalidation(projectPath: string | undefined) {
       }
     }
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.autoMode) return;
     const unsubscribe = api.autoMode.onEvent((event: AutoModeEvent) => {
       // Record that we received a WebSocket event (for event recency tracking)
@@ -241,7 +244,7 @@ export function useSpecRegenerationQueryInvalidation(projectPath: string | undef
   useEffect(() => {
     if (!projectPath) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.specRegeneration) return;
     const unsubscribe = api.specRegeneration.onEvent((event: SpecRegenerationEvent) => {
       // Only handle events for the current project
@@ -279,7 +282,7 @@ export function useGitHubValidationQueryInvalidation(projectPath: string | undef
   useEffect(() => {
     if (!projectPath) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
 
     // Check if GitHub API is available before subscribing
     if (!api.github?.onValidationEvent) {
@@ -321,7 +324,7 @@ export function useSessionQueryInvalidation(sessionId: string | undefined) {
   useEffect(() => {
     if (!sessionId) return;
 
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.agent) return;
     const unsubscribe = api.agent.onStream((data: unknown) => {
       const event = data as StreamEvent;

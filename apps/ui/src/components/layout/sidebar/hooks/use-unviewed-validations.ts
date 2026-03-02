@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import { getElectronAPI } from '@/lib/electron';
 
 const logger = createLogger('UnviewedValidations');
-import type { Project, StoredValidation } from '@/lib/electron';
 
 /**
  * Hook to track the count of unviewed (fresh) issue validations for a project.
@@ -24,7 +22,7 @@ export function useUnviewedValidations(currentProject: Project | null) {
     if (!projectPath) return;
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (api.github?.getValidations) {
         const result = await api.github.getValidations(projectPath);
         if (result.success && result.validations) {
@@ -56,7 +54,7 @@ export function useUnviewedValidations(currentProject: Project | null) {
     fetchUnviewedCount();
 
     // Subscribe to validation events to update count
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (api.github?.onValidationEvent) {
       const unsubscribe = api.github.onValidationEvent((event) => {
         if (event.projectPath === currentProject.path) {

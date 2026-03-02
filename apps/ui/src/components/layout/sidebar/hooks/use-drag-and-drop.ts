@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useSensors, useSensor, PointerSensor, type DragEndEvent } from '@dnd-kit/core';
-import type { Project } from '@/lib/electron';
 
 interface UseDragAndDropProps {
   projects: Project[];

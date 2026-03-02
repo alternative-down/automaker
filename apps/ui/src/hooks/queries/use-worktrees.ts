@@ -5,7 +5,6 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 import { createSmartPollingInterval } from '@/hooks/use-event-recency';
@@ -22,6 +21,12 @@ interface WorktreeInfo {
   changedFilesCount?: number;
   featureId?: string;
   linkedToBranch?: string;
+  /** Whether a merge, rebase, or cherry-pick is in progress with conflicts */
+  hasConflicts?: boolean;
+  /** Type of conflict operation in progress */
+  conflictType?: 'merge' | 'rebase' | 'cherry-pick';
+  /** List of files with conflicts */
+  conflictFiles?: string[];
 }
 
 interface RemovedWorktree {
@@ -52,7 +57,7 @@ export function useWorktrees(projectPath: string | undefined, includeDetails = t
     queryKey: queryKeys.worktrees.all(projectPath ?? ''),
     queryFn: async (): Promise<WorktreesResult> => {
       if (!projectPath) throw new Error('No project path');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }
@@ -85,7 +90,7 @@ export function useWorktreeInfo(projectPath: string | undefined, featureId: stri
     queryKey: queryKeys.worktrees.single(projectPath ?? '', featureId ?? ''),
     queryFn: async () => {
       if (!projectPath || !featureId) throw new Error('Missing project path or feature ID');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }
@@ -114,7 +119,7 @@ export function useWorktreeStatus(projectPath: string | undefined, featureId: st
     queryKey: queryKeys.worktrees.status(projectPath ?? '', featureId ?? ''),
     queryFn: async () => {
       if (!projectPath || !featureId) throw new Error('Missing project path or feature ID');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }
@@ -143,7 +148,7 @@ export function useWorktreeDiffs(projectPath: string | undefined, featureId: str
     queryKey: queryKeys.worktrees.diffs(projectPath ?? '', featureId ?? ''),
     queryFn: async () => {
       if (!projectPath || !featureId) throw new Error('Missing project path or feature ID');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }
@@ -154,6 +159,7 @@ export function useWorktreeDiffs(projectPath: string | undefined, featureId: str
       return {
         files: result.files ?? [],
         diff: result.diff ?? '',
+        ...(result.mergeState ? { mergeState: result.mergeState } : {}),
       };
     },
     enabled: !!projectPath && !!featureId,
@@ -179,6 +185,10 @@ interface BranchesResult {
   hasAnyRemotes: boolean;
   isGitRepo: boolean;
   hasCommits: boolean;
+  /** The name of the remote that the current branch is tracking (e.g. "origin"), if any */
+  trackingRemote?: string;
+  /** List of remote names that have a branch matching the current branch name */
+  remotesWithBranch?: string[];
 }
 
 /**
@@ -194,7 +204,7 @@ export function useWorktreeBranches(worktreePath: string | undefined, includeRem
     queryKey: queryKeys.worktrees.branches(worktreePath ?? '', includeRemote),
     queryFn: async (): Promise<BranchesResult> => {
       if (!worktreePath) throw new Error('No worktree path');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }
@@ -236,6 +246,8 @@ export function useWorktreeBranches(worktreePath: string | undefined, includeRem
         hasAnyRemotes: result.result?.hasAnyRemotes ?? false,
         isGitRepo: true,
         hasCommits: true,
+        trackingRemote: result.result?.trackingRemote,
+        remotesWithBranch: result.result?.remotesWithBranch,
       };
     },
     enabled: !!worktreePath,
@@ -256,7 +268,7 @@ export function useWorktreeInitScript(projectPath: string | undefined) {
     queryKey: queryKeys.worktrees.initScript(projectPath ?? ''),
     queryFn: async () => {
       if (!projectPath) throw new Error('No project path');
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }
@@ -285,7 +297,7 @@ export function useAvailableEditors() {
   return useQuery({
     queryKey: queryKeys.worktrees.editors(),
     queryFn: async () => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.worktree) {
         throw new Error('Worktree API not available');
       }

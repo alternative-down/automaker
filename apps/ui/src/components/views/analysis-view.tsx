@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAppStore, FileTreeNode, ProjectAnalysis, Feature } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -81,7 +80,7 @@ export function AnalysisView() {
     async (path: string, depth: number = 0): Promise<FileTreeNode[]> => {
       if (depth > 10) return []; // Prevent infinite recursion
 
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       try {
         const result = await api.readdir(path);
         if (!result.success || !result.entries) return [];
@@ -186,7 +185,7 @@ export function AnalysisView() {
     setSpecGenerated(false);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
 
       // Read key files to understand the project better
       const fileContents: Record<string, string> = {};
@@ -237,7 +236,6 @@ export function AnalysisView() {
             if (pkg.dependencies?.vue) stack.push('Vue');
             if (pkg.dependencies?.angular) stack.push('Angular');
             if (pkg.dependencies?.express) stack.push('Express');
-            if (pkg.dependencies?.electron) stack.push('Electron');
             if (pkg.devDependencies?.typescript || pkg.dependencies?.typescript)
               stack.push('TypeScript');
             if (pkg.devDependencies?.tailwindcss || pkg.dependencies?.tailwindcss)
@@ -395,7 +393,7 @@ ${Object.entries(projectAnalysis.filesByExtension)
     setFeatureListGenerated(false);
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
 
       // Read key files to understand the project
       const fileContents: Record<string, string> = {};
@@ -539,7 +537,6 @@ ${Object.entries(projectAnalysis.filesByExtension)
             }
 
             // Electron (desktop app)
-            if (pkg.dependencies?.electron || pkg.devDependencies?.electron) {
               detectedFeatures.push({
                 category: 'Platform',
                 description: 'Electron desktop application',

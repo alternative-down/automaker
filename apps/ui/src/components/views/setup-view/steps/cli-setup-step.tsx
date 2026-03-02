@@ -10,7 +10,6 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import {
   CheckCircle2,
   Key,
@@ -163,7 +162,7 @@ export function CliSetupStep({ config, state, onNext, onBack, onSkip }: CliSetup
   const { isInstalling, installProgress, install } = useCliInstallation({
     cliType: config.cliType,
     installApi,
-    onProgressEvent: getElectronAPI().setup?.onInstallProgress,
+    onProgressEvent: .setup?.onInstallProgress,
     onSuccess: onInstallSuccess,
     getStoreState,
   });
@@ -261,7 +260,7 @@ export function CliSetupStep({ config, state, onNext, onBack, onSkip }: CliSetup
   const deleteApiKey = useCallback(async () => {
     setIsDeletingApiKey(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       if (!api.setup?.deleteApiKey) {
         toast.error('Delete API not available');
         return;

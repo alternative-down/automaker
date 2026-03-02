@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import type { GitHubIssue, StoredValidation } from '@/lib/electron';
 import type { IssuesFilterState, IssuesFilterResult, IssuesValidationStatus } from '../types';
 import { isValidationStale } from '../utils';
 

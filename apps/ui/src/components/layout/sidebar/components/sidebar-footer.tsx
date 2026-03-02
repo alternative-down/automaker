@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils';
 import { formatShortcut } from '@/store/app-store';
 import { Activity, Settings, BookOpen, MessageSquare, ExternalLink } from 'lucide-react';
 import { useOSDetection } from '@/hooks/use-os-detection';
-import { getElectronAPI } from '@/lib/electron';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 function getOSAbbreviation(os: string): string {
@@ -52,7 +51,7 @@ export function SidebarFooter({
 
   const handleFeedbackClick = useCallback(() => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       api.openExternalLink('https://github.com/AutoMaker-Org/automaker/issues');
     } catch {
       // Fallback for non-Electron environments (SSR, web browser)

@@ -1,6 +1,6 @@
 /**
  * @automaker/platform
- * Platform-specific utilities for AutoMaker
+ * Platform-specific utilities for AutoMaker (Forked for Web-only)
  */
 
 // Path utilities
@@ -20,7 +20,6 @@ export {
   getBranchTrackingPath,
   getExecutionStatePath,
   getNotificationsPath,
-  // Event history paths
   getEventHistoryDir,
   getEventHistoryIndexPath,
   getEventPath,
@@ -30,7 +29,6 @@ export {
   getCredentialsPath,
   getProjectSettingsPath,
   ensureDataDir,
-  // Ideation paths
   getIdeationDir,
   getIdeasDir,
   getIdeaDir,
@@ -63,10 +61,10 @@ export {
   getAllowedPaths,
 } from './security.js';
 
-// Secure file system (validates paths before I/O operations)
+// Secure file system
 export * as secureFs from './secure-fs.js';
 
-// Node.js executable finder (cross-platform)
+// Node.js finder
 export {
   findNodeExecutable,
   buildEnhancedPath,
@@ -74,7 +72,7 @@ export {
   type NodeFinderOptions,
 } from './node-finder.js';
 
-// WSL (Windows Subsystem for Linux) utilities
+// WSL utilities
 export {
   isWslAvailable,
   clearWslCache,
@@ -89,84 +87,23 @@ export {
   type WslOptions,
 } from './wsl.js';
 
-// System paths for tool detection (GitHub CLI, Claude CLI, Node.js, etc.)
-export * as systemPaths from './system-paths.js';
+// System paths
 export {
-  // CLI tool paths
   getGitHubCliPaths,
   getClaudeCliPaths,
   getClaudeConfigDir,
-  getClaudeCredentialPaths,
   getClaudeSettingsPath,
-  getClaudeStatsCachePath,
-  getClaudeProjectsDir,
   getCodexCliPaths,
-  getCodexConfigDir,
-  getCodexAuthPath,
-  getGitBashPaths,
-  getOpenCodeCliPaths,
-  getOpenCodeConfigDir,
-  getOpenCodeAuthPath,
-  getShellPaths,
-  getExtendedPath,
-  // Node.js paths
-  getNvmPaths,
-  getFnmPaths,
-  getNodeSystemPaths,
-  getScoopNodePath,
-  getChocolateyNodePath,
-  getWslVersionPath,
-  // System path operations
   systemPathExists,
-  systemPathAccess,
-  systemPathIsExecutable,
-  systemPathReadFile,
-  systemPathReadFileSync,
-  systemPathWriteFileSync,
-  systemPathReaddir,
-  systemPathReaddirSync,
-  systemPathStatSync,
-  systemPathStat,
-  isAllowedSystemPath,
-  // High-level methods
   findFirstExistingPath,
-  findGitHubCliPath,
   findClaudeCliPath,
-  getClaudeAuthIndicators,
-  type ClaudeAuthIndicators,
   findCodexCliPath,
-  getCodexAuthIndicators,
-  type CodexAuthIndicators,
-  findGitBashPath,
-  findOpenCodeCliPath,
-  getOpenCodeAuthIndicators,
-  type OpenCodeAuthIndicators,
-  // Electron userData operations
-  setElectronUserDataPath,
-  getElectronUserDataPath,
-  isElectronUserDataPath,
-  electronUserDataReadFileSync,
-  electronUserDataWriteFileSync,
-  electronUserDataExists,
-  // Script directory operations
-  setScriptBaseDir,
-  getScriptBaseDir,
-  scriptDirExists,
-  scriptDirMkdirSync,
-  scriptDirCreateWriteStream,
-  // Electron app bundle operations
-  setElectronAppPaths,
-  electronAppExists,
-  electronAppReadFileSync,
-  electronAppStatSync,
-  electronAppStat,
-  electronAppReadFile,
 } from './system-paths.js';
 
 // Port configuration
 export { STATIC_PORT, SERVER_PORT, RESERVED_PORTS } from './config/ports.js';
 
-// Editor detection and launching (cross-platform)
+// Editor detection
 export {
   commandExists,
   clearEditorCache,
@@ -178,7 +115,7 @@ export {
   openInTerminal,
 } from './editor.js';
 
-// External terminal detection and launching
+// External terminal detection
 export {
   clearTerminalCache,
   detectAllTerminals,
@@ -187,7 +124,7 @@ export {
   openInExternalTerminal,
 } from './terminal.js';
 
-// RC Generator - Shell configuration file generation
+// RC Generator
 export {
   hexToXterm256,
   getThemeANSIColors,
@@ -201,7 +138,7 @@ export {
   type ANSIColors,
 } from './rc-generator.js';
 
-// RC File Manager - Shell configuration file I/O
+// RC File Manager
 export {
   RC_FILE_VERSION,
   getTerminalDir,
@@ -218,5 +155,5 @@ export {
   ensureUserCustomFile,
 } from './rc-file-manager.js';
 
-// Terminal Theme Colors - Raw theme color data for all 40 themes
+// Terminal Theme Colors
 export { terminalThemeColors, getTerminalThemeColors } from './terminal-theme-colors.js';

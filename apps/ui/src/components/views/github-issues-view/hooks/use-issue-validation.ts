@@ -8,7 +8,6 @@ import {
   IssueValidationResult,
   IssueValidationEvent,
   StoredValidation,
-} from '@/lib/electron';
 import type { LinkedPRInfo, PhaseModelEntry, ModelId } from '@automaker/types';
 import { useAppStore } from '@/store/app-store';
 import { toast } from 'sonner';
@@ -61,7 +60,7 @@ export function useIssueValidation({
       if (!currentProject?.path) return;
 
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         if (api.github?.getValidations) {
           const result = await api.github.getValidations(currentProject.path);
           if (isMounted && result.success && result.validations) {
@@ -94,7 +93,7 @@ export function useIssueValidation({
       if (!currentProject?.path) return;
 
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         if (api.github?.getValidationStatus) {
           const result = await api.github.getValidationStatus(currentProject.path);
           if (isMounted && result.success && result.runningIssues) {
@@ -117,7 +116,7 @@ export function useIssueValidation({
 
   // Subscribe to validation events
   useEffect(() => {
-    const api = getElectronAPI();
+    const api = getHttpApiClient();
     if (!api.github?.onValidationEvent) return;
 
     const handleValidationEvent = (event: IssueValidationEvent) => {

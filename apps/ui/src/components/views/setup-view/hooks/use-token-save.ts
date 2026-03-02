@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
-import { getElectronAPI } from '@/lib/electron';
 import { createLogger } from '@automaker/utils/logger';
 
 const logger = createLogger('TokenSave');
@@ -22,7 +21,7 @@ export function useTokenSave({ provider, onSuccess }: UseTokenSaveOptions) {
 
       setIsSaving(true);
       try {
-        const api = getElectronAPI();
+        const api = getHttpApiClient();
         const setupApi = api.setup;
 
         if (setupApi?.storeApiKey) {

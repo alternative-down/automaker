@@ -6,7 +6,6 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { getElectronAPI } from '@/lib/electron';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { Feature } from '@/store/app-store';
@@ -28,7 +27,7 @@ export function useCreateFeature(projectPath: string) {
 
   return useMutation({
     mutationFn: async (feature: Feature) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.features?.create(projectPath, feature);
       if (!result?.success) {
         throw new Error(result?.error || 'Failed to create feature');
@@ -72,7 +71,7 @@ export function useUpdateFeature(projectPath: string) {
       enhancementMode?: 'improve' | 'technical' | 'simplify' | 'acceptance' | 'ux-reviewer';
       preEnhancementDescription?: string;
     }) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.features?.update(
         projectPath,
         featureId,
@@ -137,7 +136,7 @@ export function useDeleteFeature(projectPath: string) {
 
   return useMutation({
     mutationFn: async (featureId: string) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.features?.delete(projectPath, featureId);
       if (!result?.success) {
         throw new Error(result?.error || 'Failed to delete feature');
@@ -189,7 +188,7 @@ export function useDeleteFeature(projectPath: string) {
 export function useGenerateTitle() {
   return useMutation({
     mutationFn: async (description: string) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.features?.generateTitle(description);
       if (!result?.success) {
         throw new Error(result?.error || 'Failed to generate title');
@@ -215,7 +214,7 @@ export function useBatchUpdateFeatures(projectPath: string) {
 
   return useMutation({
     mutationFn: async (updates: Array<{ featureId: string; updates: Partial<Feature> }>) => {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const results = await Promise.all(
         updates.map(({ featureId, updates: featureUpdates }) =>
           api.features?.update(projectPath, featureId, featureUpdates)

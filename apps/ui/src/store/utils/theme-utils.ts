@@ -1,6 +1,5 @@
 import { getItem, setItem, removeItem } from '@/lib/storage';
 import { DEFAULT_FONT_VALUE } from '@/config/ui-font-options';
-import type { Project } from '@/lib/electron';
 import type { ThemeMode } from '../types/ui-types';
 
 // LocalStorage keys for persistence (fallback when server settings aren't available)

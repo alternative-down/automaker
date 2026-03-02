@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { useAppStore } from '@/store/app-store';
-import { getElectronAPI } from '@/lib/electron';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -86,7 +85,7 @@ export function MemoryView() {
 
     setIsLoading(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
 
       // Ensure memory directory exists
       await api.mkdir(memoryPath);
@@ -116,7 +115,7 @@ export function MemoryView() {
   // Load selected file content
   const loadFileContent = useCallback(async (file: MemoryFile) => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const result = await api.readFile(file.path);
       if (result.success && result.content !== undefined) {
         setEditedContent(result.content);
@@ -143,7 +142,7 @@ export function MemoryView() {
 
     setIsSaving(true);
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       await api.writeFile(selectedFile.path, editedContent);
       setSelectedFile({ ...selectedFile, content: editedContent });
       setHasChanges(false);
@@ -166,7 +165,7 @@ export function MemoryView() {
     if (!memoryPath || !newMemoryName.trim()) return;
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       let filename = newMemoryName.trim();
 
       // Add .md extension if not provided
@@ -199,7 +198,7 @@ export function MemoryView() {
     if (!selectedFile) return;
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       await api.deleteFile(selectedFile.path);
 
       setIsDeleteDialogOpen(false);
@@ -229,7 +228,7 @@ export function MemoryView() {
     }
 
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       const newPath = `${memoryPath}/${newName}`;
 
       // Check if file with new name already exists
@@ -273,7 +272,7 @@ export function MemoryView() {
   // Delete file from list (used by dropdown)
   const handleDeleteFromList = async (file: MemoryFile) => {
     try {
-      const api = getElectronAPI();
+      const api = getHttpApiClient();
       await api.deleteFile(file.path);
 
       // Clear selection if this was the selected file
