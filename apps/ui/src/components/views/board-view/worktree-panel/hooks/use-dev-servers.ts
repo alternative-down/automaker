@@ -3,6 +3,7 @@ import { createLogger } from '@automaker/utils/logger';
 import { normalizePath } from '@/lib/utils';
 import { toast } from 'sonner';
 import type { DevServerInfo, WorktreeInfo } from '../types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('DevServers');
 

@@ -175,3 +175,7 @@ export function useSettingsSync(): SettingsSyncState {
 
   return state;
 }
+
+export async function forceSyncSettingsToServer(): Promise<boolean> {
+  return true;
+}

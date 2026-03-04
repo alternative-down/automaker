@@ -91,7 +91,7 @@ export async function openDirectoryPicker(): Promise<DirectoryPickerResult | nul
       // webkitRelativePath format: "directoryName/subfolder/file.txt" or "directoryName/file.txt"
       let directoryName = 'Selected Directory';
 
-      // Method 1: Try to get absolute path from File object (non-standard, works in Electron/Chromium)
+      // Method 1: Try to get absolute path from File object (non-standard, works in Chromium)
       // @ts-expect-error - path property is non-standard but available in some browsers
       if (firstFile.path) {
         // @ts-expect-error - path property is non-standard but available in some browsers

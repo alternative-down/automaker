@@ -27,6 +27,7 @@ import type {
   IssueValidationConfidence,
   IssueComplexity,
   GitHubIssue,
+} from '@automaker/types';
 
 interface ValidationDialogProps {
   open: boolean;

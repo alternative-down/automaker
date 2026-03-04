@@ -5,6 +5,7 @@ import { Feature } from '@/store/app-store';
 import { useAppStore } from '@/store/app-store';
 import { createLogger } from '@automaker/utils/logger';
 import { queryKeys } from '@/lib/query-keys';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('BoardPersistence');
 

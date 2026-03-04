@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn, generateUUID } from '@/lib/utils';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('AnalysisView');
 
@@ -536,10 +537,11 @@ ${Object.entries(projectAnalysis.filesByExtension)
               });
             }
 
-            // Electron (desktop app)
+            // Desktop app
+            if (pkg.devDependencies?.tauri || pkg.dependencies?.tauri) {
               detectedFeatures.push({
                 category: 'Platform',
-                description: 'Electron desktop application',
+                description: 'Desktop application',
                 passes: true,
               });
             }

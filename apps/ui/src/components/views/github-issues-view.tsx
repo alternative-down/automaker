@@ -25,6 +25,7 @@ import type {
   IssuesStateFilter,
 } from './github-issues-view/types';
 import { DEFAULT_ISSUES_FILTER_STATE } from './github-issues-view/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('GitHubIssuesView');
 

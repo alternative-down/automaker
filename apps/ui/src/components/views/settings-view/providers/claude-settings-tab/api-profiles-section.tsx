@@ -64,18 +64,12 @@ function maskApiKey(key?: string): string {
 // Provider type display names
 const PROVIDER_TYPE_LABELS: Record<ClaudeCompatibleProviderType, string> = {
   anthropic: 'Anthropic',
-  glm: 'GLM',
-  minimax: 'MiniMax',
-  openrouter: 'OpenRouter',
   custom: 'Custom',
 };
 
 // Provider type badge colors
 const PROVIDER_TYPE_COLORS: Record<ClaudeCompatibleProviderType, string> = {
   anthropic: 'bg-brand-500/20 text-brand-500',
-  glm: 'bg-emerald-500/20 text-emerald-500',
-  minimax: 'bg-purple-500/20 text-purple-500',
-  openrouter: 'bg-amber-500/20 text-amber-500',
   custom: 'bg-zinc-500/20 text-zinc-400',
 };
 
@@ -117,7 +111,7 @@ const emptyFormData: ProviderFormData = {
 };
 
 // Provider types that have fixed settings (no need to show toggles)
-const FIXED_SETTINGS_PROVIDERS: ClaudeCompatibleProviderType[] = ['glm', 'minimax'];
+const FIXED_SETTINGS_PROVIDERS: ClaudeCompatibleProviderType[] = [];
 
 // Check if provider type has fixed settings
 function hasFixedSettings(providerType: ClaudeCompatibleProviderType): boolean {
@@ -207,7 +201,7 @@ export function ApiProfilesSection() {
   };
 
   const handleSave = () => {
-    // For GLM/MiniMax, enforce fixed settings
+    // For provider templates with fixed settings, enforce template defaults
     const isFixedProvider = hasFixedSettings(formData.providerType);
 
     // Convert form models to ProviderModel format
@@ -411,7 +405,7 @@ export function ApiProfilesSection() {
                 id="provider-name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="e.g., GLM (Work)"
+                placeholder="e.g., Anthropic (Work)"
                 className={isDuplicateName ? 'border-destructive' : ''}
               />
               {isDuplicateName && (
@@ -433,9 +427,6 @@ export function ApiProfilesSection() {
                     <SelectValue placeholder="Select provider type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="glm">GLM (z.AI)</SelectItem>
-                    <SelectItem value="minimax">MiniMax</SelectItem>
-                    <SelectItem value="openrouter">OpenRouter</SelectItem>
                     <SelectItem value="anthropic">Anthropic</SelectItem>
                     <SelectItem value="custom">Custom</SelectItem>
                   </SelectContent>
@@ -614,7 +605,7 @@ export function ApiProfilesSection() {
                                 <Input
                                   value={model.id}
                                   onChange={(e) => handleUpdateModel(index, { id: e.target.value })}
-                                  placeholder="e.g., GLM-4.7"
+                                  placeholder="e.g., claude-3-5-sonnet-20241022"
                                   className="text-xs h-8"
                                 />
                               </div>
@@ -627,7 +618,7 @@ export function ApiProfilesSection() {
                                   onChange={(e) =>
                                     handleUpdateModel(index, { displayName: e.target.value })
                                   }
-                                  placeholder="e.g., GLM 4.7"
+                                  placeholder="e.g., Claude Sonnet 3.5"
                                   className="text-xs h-8"
                                 />
                               </div>
@@ -725,7 +716,7 @@ export function ApiProfilesSection() {
                                 <Input
                                   value={model.id}
                                   onChange={(e) => handleUpdateModel(index, { id: e.target.value })}
-                                  placeholder="e.g., GLM-4.7"
+                                  placeholder="e.g., claude-3-5-sonnet-20241022"
                                   className="text-xs h-8"
                                 />
                               </div>
@@ -738,7 +729,7 @@ export function ApiProfilesSection() {
                                   onChange={(e) =>
                                     handleUpdateModel(index, { displayName: e.target.value })
                                   }
-                                  placeholder="e.g., GLM 4.7"
+                                  placeholder="e.g., Claude Sonnet 3.5"
                                   className="text-xs h-8"
                                 />
                               </div>

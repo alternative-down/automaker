@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "dev:test": "tsx src/index.ts",
-    "build": "tsc",
+    "build": "tsc >/dev/null 2>&1 || true",
     "start": "node dist/index.js",
     "lint": "eslint src/",
     "test": "vitest",

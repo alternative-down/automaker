@@ -9,6 +9,7 @@ import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { LinkedPRInfo, ModelId, ThinkingLevel, ReasoningEffort } from '@automaker/types';
 import { resolveModelString } from '@automaker/model-resolver';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Input for validating a GitHub issue

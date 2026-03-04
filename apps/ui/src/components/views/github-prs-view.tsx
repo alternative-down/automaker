@@ -27,6 +27,7 @@ import { useCreateFeature } from '@/hooks/mutations/use-feature-mutations';
 import { PRCommentResolutionDialog } from '@/components/dialogs';
 import { resolveModelString } from '@automaker/model-resolver';
 import { toast } from 'sonner';
+import { getHttpApiClient } from '@/lib/http-api-client';
 import {
   DropdownMenu,
   DropdownMenuContent,

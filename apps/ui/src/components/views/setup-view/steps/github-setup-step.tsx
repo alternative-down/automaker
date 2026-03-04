@@ -17,6 +17,7 @@ import {
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 import { StatusBadge } from '../components';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('GitHubSetupStep');
 

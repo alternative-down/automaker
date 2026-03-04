@@ -56,13 +56,8 @@ import { getTerminalService } from './services/terminal-service.js';
 import { SettingsService } from './services/settings-service.js';
 import { createSpecRegenerationRoutes } from './routes/app-spec/index.js';
 import { createClaudeRoutes } from './routes/claude/index.js';
-import { ClaudeUsageService } from './services/claude-usage-service.js';
 import { createCodexRoutes } from './routes/codex/index.js';
-import { CodexUsageService } from './services/codex-usage-service.js';
-import { CodexAppServerService } from './services/codex-app-server-service.js';
-import { CodexModelCacheService } from './services/codex-model-cache-service.js';
 import { createGeminiRoutes } from './routes/gemini/index.js';
-import { GeminiUsageService } from './services/gemini-usage-service.js';
 import { createGitHubRoutes } from './routes/github/index.js';
 import { createContextRoutes } from './routes/context/index.js';
 import { createBacklogPlanRoutes } from './routes/backlog-plan/index.js';
@@ -167,11 +162,6 @@ const settingsService = new SettingsService(DATA_DIR);
 const agentService = new AgentService(DATA_DIR, events, settingsService);
 const featureLoader = new FeatureLoader();
 const autoModeService = new AutoModeServiceCompat(events, settingsService, featureLoader);
-const claudeUsageService = new ClaudeUsageService();
-const codexAppServerService = new CodexAppServerService();
-const codexModelCacheService = new CodexModelCacheService(DATA_DIR, codexAppServerService);
-const codexUsageService = new CodexUsageService(codexAppServerService);
-const geminiUsageService = new GeminiUsageService();
 const mcpTestService = new MCPTestService(settingsService);
 const ideationService = new IdeationService(events, settingsService, featureLoader);
 
@@ -200,8 +190,6 @@ eventHookService.initialize(events, settingsService, eventHistoryService, featur
       await autoModeService.reconcileFeatureStates(project.path);
     }
   }
-
-  void codexModelCacheService.getModels().catch(() => {});
 })();
 
 app.use('/api', requireJsonContentType);
@@ -225,9 +213,9 @@ app.use('/api/workspace', createWorkspaceRoutes());
 app.use('/api/templates', createTemplatesRoutes());
 app.use('/api/terminal', createTerminalRoutes());
 app.use('/api/settings', createSettingsRoutes(settingsService));
-app.use('/api/claude', createClaudeRoutes(claudeUsageService));
-app.use('/api/codex', createCodexRoutes(codexUsageService, codexModelCacheService));
-app.use('/api/gemini', createGeminiRoutes(geminiUsageService, events));
+app.use('/api/claude', createClaudeRoutes());
+app.use('/api/codex', createCodexRoutes());
+app.use('/api/gemini', createGeminiRoutes(events));
 app.use('/api/github', createGitHubRoutes(events, settingsService));
 app.use('/api/context', createContextRoutes(settingsService));
 app.use('/api/backlog-plan', createBacklogPlanRoutes(events, settingsService));

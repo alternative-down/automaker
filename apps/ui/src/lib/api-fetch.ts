@@ -2,7 +2,7 @@
  * Authenticated fetch utility
  *
  * Provides a wrapper around fetch that automatically includes:
- * - X-API-Key header (for Electron mode)
+ * - X-API-Key header (for desktop mode)
  * - X-Session-Token header (for web mode with explicit token)
  * - credentials: 'include' (fallback for web mode session cookies)
  *
@@ -35,7 +35,7 @@ export function getAuthHeaders(additionalHeaders?: Record<string, string>): Reco
     ...additionalHeaders,
   };
 
-  // Electron mode: use API key
+  // Desktop mode: use API key
   const apiKey = getApiKey();
   if (apiKey) {
     headers['X-API-Key'] = apiKey;

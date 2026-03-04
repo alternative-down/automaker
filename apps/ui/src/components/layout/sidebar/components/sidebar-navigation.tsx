@@ -4,7 +4,7 @@ import { ChevronDown, Wrench, Github, Folder } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { cn, isMac } from '@/lib/utils';
-import { MACOS_ELECTRON_TOP_PADDING_CLASS } from '../constants';
+import { MACOS_TOP_PADDING_CLASS } from '../constants';
 import { formatShortcut, useAppStore } from '@/store/app-store';
 import { getAuthenticatedImageUrl } from '@/lib/api-fetch';
 import type { NavSection } from '../types';
@@ -117,10 +117,10 @@ export function SidebarNavigation({
       className={cn(
         'flex-1 overflow-y-auto scrollbar-hide px-3 pb-2',
         // Add top padding in discord mode since there's no header
-        // Extra padding for macOS Electron to avoid traffic light overlap
+        // Extra padding for macOS desktop to avoid traffic light overlap
         sidebarStyle === 'discord'
           ? isMac && false
-            ? MACOS_ELECTRON_TOP_PADDING_CLASS
+            ? MACOS_TOP_PADDING_CLASS
             : 'pt-3'
           : 'mt-1'
       )}

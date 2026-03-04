@@ -15,6 +15,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
 import { BranchAutocomplete } from '@/components/ui/branch-autocomplete';
 import type { WorktreeInfo, BranchInfo, MergeConflictInfo } from '../worktree-panel/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 export type { MergeConflictInfo } from '../worktree-panel/types';
 

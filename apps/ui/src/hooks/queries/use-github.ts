@@ -7,12 +7,14 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
+import { getHttpApiClient } from '@/lib/http-api-client';
 import type {
   GitHubIssue,
   GitHubPR,
   GitHubComment,
   PRReviewComment,
   StoredValidation,
+} from '@automaker/types';
 
 interface GitHubIssuesResult {
   openIssues: GitHubIssue[];

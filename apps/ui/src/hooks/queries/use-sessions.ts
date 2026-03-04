@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Fetch all sessions

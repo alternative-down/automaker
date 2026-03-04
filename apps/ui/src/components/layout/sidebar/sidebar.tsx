@@ -40,6 +40,7 @@ import { DeleteProjectDialog } from '@/components/views/settings-view/components
 import { RemoveFromAutomakerDialog } from '@/components/views/settings-view/components/remove-from-automaker-dialog';
 import { NewProjectModal } from '@/components/dialogs/new-project-modal';
 import { CreateSpecDialog } from '@/components/views/spec-view/dialogs';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('Sidebar');
 

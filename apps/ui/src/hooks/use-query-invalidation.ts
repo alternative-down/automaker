@@ -11,6 +11,7 @@ import { queryKeys } from '@/lib/query-keys';
 import type { IssueValidationEvent } from '@automaker/types';
 import { debounce, type DebouncedFunction } from '@automaker/utils/debounce';
 import { useEventRecencyStore } from './use-event-recency';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Debounce configuration for auto_mode_progress invalidations

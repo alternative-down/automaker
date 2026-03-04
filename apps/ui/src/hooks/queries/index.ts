@@ -1,13 +1,5 @@
 /**
  * Query Hooks Barrel Export
- *
- * Central export point for all React Query hooks.
- * Import from this file for cleaner imports across the app.
- *
- * @example
- * ```tsx
- * import { useFeatures, useGitHubIssues, useClaudeUsage } from '@/hooks/queries';
- * ```
  */
 
 // Features
@@ -24,7 +16,7 @@ export {
 } from './use-github';
 
 // Usage
-export { useClaudeUsage, useCodexUsage, useZaiUsage, useGeminiUsage } from './use-usage';
+export { useClaudeUsage, useCodexUsage, useGeminiUsage } from './use-usage';
 
 // Running Agents
 export { useRunningAgents, useRunningAgentsCount } from './use-running-agents';
@@ -50,11 +42,7 @@ export {
 } from './use-settings';
 
 // Models
-export {
-  useAvailableModels,
-  useCodexModels,
-  useModelProviders,
-} from './use-models';
+export { useAvailableModels, useCodexModels, useModelProviders } from './use-models';
 
 // CLI Status
 export {

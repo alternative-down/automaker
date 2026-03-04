@@ -38,6 +38,7 @@ import type {
   CodexAuthStatus,
 } from '@/store/setup-store';
 import { PROVIDER_ICON_COMPONENTS } from '@/components/ui/provider-icon';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 type VerificationStatus = 'idle' | 'verifying' | 'verified' | 'error';
 
@@ -162,7 +163,7 @@ export function CliSetupStep({ config, state, onNext, onBack, onSkip }: CliSetup
   const { isInstalling, installProgress, install } = useCliInstallation({
     cliType: config.cliType,
     installApi,
-    onProgressEvent: .setup?.onInstallProgress,
+    onProgressEvent: getHttpApiClient().setup?.onInstallProgress,
     onSuccess: onInstallSuccess,
     getStoreState,
   });

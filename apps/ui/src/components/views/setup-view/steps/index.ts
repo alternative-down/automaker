@@ -7,5 +7,4 @@ export { GitHubSetupStep } from './github-setup-step';
 
 // Legacy individual step exports (kept for backwards compatibility)
 export { ClaudeSetupStep } from './claude-setup-step';
-export { CursorSetupStep } from './cursor-setup-step';
 export { CodexSetupStep } from './codex-setup-step';

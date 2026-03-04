@@ -767,29 +767,27 @@ export function BoardView() {
         // Create worktree for 'auto' or 'custom' modes when we have a branch name
         if ((workMode === 'auto' || workMode === 'custom') && finalBranchName) {
           try {
-                currentProject.path,
-                finalBranchName
+            const api = getHttpApiClient();
+            const result = await api.worktrees.create(currentProject.path, finalBranchName);
+            if (result.success && result.worktree) {
+              logger.info(
+                `Worktree for branch "${finalBranchName}" ${
+                  result.worktree?.isNew ? 'created' : 'already exists'
+                }`
               );
-              if (result.success && result.worktree) {
-                logger.info(
-                  `Worktree for branch "${finalBranchName}" ${
-                    result.worktree?.isNew ? 'created' : 'already exists'
-                  }`
-                );
-                // Auto-select the worktree when creating/using it for bulk update
-                addAndSelectWorktree(result.worktree);
-                // Refresh worktree list in UI
-                setWorktreeRefreshKey((k) => k + 1);
-              } else if (!result.success) {
-                logger.error(
-                  `Failed to create worktree for branch "${finalBranchName}":`,
-                  result.error
-                );
-                toast.error('Failed to create worktree', {
-                  description: result.error || 'An error occurred',
-                });
-                return; // Don't proceed with update if worktree creation failed
-              }
+              // Auto-select the worktree when creating/using it for bulk update
+              addAndSelectWorktree(result.worktree);
+              // Refresh worktree list in UI
+              setWorktreeRefreshKey((k) => k + 1);
+            } else if (!result.success) {
+              logger.error(
+                `Failed to create worktree for branch "${finalBranchName}":`,
+                result.error
+              );
+              toast.error('Failed to create worktree', {
+                description: result.error || 'An error occurred',
+              });
+              return; // Don't proceed with update if worktree creation failed
             }
           } catch (error) {
             logger.error('Error creating worktree:', error);

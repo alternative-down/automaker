@@ -33,11 +33,8 @@ export function useSidebarAutoCollapse({
     return () => mediaQuery.removeEventListener('change', handleResize);
   }, [sidebarOpen, toggleSidebar]);
 
-  // Update Electron window minWidth when sidebar state changes
-  // This ensures the window can't be resized smaller than what the kanban board needs
+  // Keep dependency for future desktop window constraints (currently no-op in web mode)
   useEffect(() => {
-      window as unknown as {
-      }
-    }
+    void sidebarOpen;
   }, [sidebarOpen]);
 }

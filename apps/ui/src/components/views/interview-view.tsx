@@ -12,6 +12,7 @@ import { useFileBrowser } from '@/contexts/file-browser-context';
 import { toast } from 'sonner';
 import { useNavigate } from '@tanstack/react-router';
 import { getDefaultWorkspaceDirectory, saveLastProjectDirectory } from '@/lib/workspace-config';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('InterviewView');
 
@@ -322,6 +323,7 @@ export function InterviewView() {
       const api = getHttpApiClient();
       // Use platform-specific path separator
       const pathSep =
+        typeof navigator !== 'undefined'
           ? navigator.platform.indexOf('Win') !== -1
             ? '\\'
             : '/'

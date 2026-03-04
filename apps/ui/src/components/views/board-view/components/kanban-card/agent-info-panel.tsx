@@ -10,6 +10,7 @@ import { SummaryDialog } from './summary-dialog';
 import { getProviderIconForModel } from '@/components/ui/provider-icon';
 import { useFeature, useAgentOutput } from '@/hooks/queries';
 import { queryKeys } from '@/lib/query-keys';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Formats thinking level for compact display

@@ -5,6 +5,7 @@ import { formatShortcut } from '@/store/app-store';
 import { Activity, Settings, BookOpen, MessageSquare, ExternalLink } from 'lucide-react';
 import { useOSDetection } from '@/hooks/use-os-detection';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 function getOSAbbreviation(os: string): string {
   switch (os) {
@@ -54,7 +55,7 @@ export function SidebarFooter({
       const api = getHttpApiClient();
       api.openExternalLink('https://github.com/AutoMaker-Org/automaker/issues');
     } catch {
-      // Fallback for non-Electron environments (SSR, web browser)
+      // Fallback for non-desktop environments (SSR, web browser)
       window.open('https://github.com/AutoMaker-Org/automaker/issues', '_blank');
     }
   }, []);

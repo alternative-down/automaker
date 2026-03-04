@@ -13,10 +13,8 @@ const PROVIDERS_DROPDOWN_KEY = 'settings-providers-dropdown-open';
 // Map navigation item IDs to provider types for checking disabled state
 const NAV_ID_TO_PROVIDER: Record<string, ModelProvider> = {
   'claude-provider': 'claude',
-  'cursor-provider': 'cursor',
   'codex-provider': 'codex',
   'gemini-provider': 'gemini',
-  'copilot-provider': 'copilot',
 };
 
 interface SettingsNavigationProps {

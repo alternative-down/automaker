@@ -10,6 +10,7 @@ import { useApiKeyManagement } from './hooks/use-api-key-management';
 import { cn } from '@/lib/utils';
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 export function ApiKeysSection() {
   const { apiKeys, setApiKeys } = useAppStore();
@@ -21,7 +22,6 @@ export function ApiKeysSection() {
 
   const providerConfigs = buildProviderConfigs(providerConfigParams);
 
-  // Delete Anthropic API key
   const deleteAnthropicKey = useCallback(async () => {
     setIsDeletingAnthropicKey(true);
     try {
@@ -50,7 +50,6 @@ export function ApiKeysSection() {
     }
   }, [apiKeys, setApiKeys, claudeAuthStatus, setClaudeAuthStatus]);
 
-  // Delete OpenAI API key
   const deleteOpenaiKey = useCallback(async () => {
     setIsDeletingOpenaiKey(true);
     try {
@@ -63,10 +62,7 @@ export function ApiKeysSection() {
       const result = await api.setup.deleteApiKey('openai');
       if (result.success) {
         setApiKeys({ ...apiKeys, openai: '' });
-        setCodexAuthStatus({
-          authenticated: false,
-          method: 'none',
-        });
+        setCodexAuthStatus({ authenticated: false, method: 'none' });
         toast.success('OpenAI API key deleted');
       } else {
         toast.error(result.error || 'Failed to delete API key');
@@ -99,31 +95,18 @@ export function ApiKeysSection() {
         </p>
       </div>
       <div className="p-6 space-y-6">
-        {/* API Key Fields with contextual info */}
         {providerConfigs.map((provider) => (
           <div key={provider.key}>
             <ApiKeyField config={provider} />
-            {/* Anthropic-specific provider info */}
             {provider.key === 'anthropic' && (
               <div className="mt-3 p-3 rounded-lg bg-blue-500/5 border border-blue-500/20">
                 <div className="flex gap-2">
                   <Info className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-muted-foreground space-y-1">
                     <p>
-                      <span className="font-medium text-foreground/80">
-                        Using Claude Compatible Providers?
-                      </span>{' '}
-                      Add a provider in <span className="text-blue-500">AI Providers → Claude</span>{' '}
-                      with{' '}
-                      <span className="font-mono text-[10px] bg-muted/50 px-1 rounded">
-                        credentials
-                      </span>{' '}
-                      as the API key source to use this key.
-                    </p>
-                    <p>
-                      For alternative providers (z.AI GLM, MiniMax, OpenRouter), add a provider with{' '}
-                      <span className="font-mono text-[10px] bg-muted/50 px-1 rounded">inline</span>{' '}
-                      key source and enter the provider's API key directly.
+                      <span className="font-medium text-foreground/80">Using Claude-compatible profiles?</span>{' '}
+                      Add a provider in <span className="text-blue-500">AI Providers → Claude</span> and choose
+                      the API key source according to your setup.
                     </p>
                   </div>
                 </div>
@@ -132,10 +115,8 @@ export function ApiKeysSection() {
           </div>
         ))}
 
-        {/* Security Notice */}
         <SecurityNotice />
 
-        {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button
             onClick={handleSave}

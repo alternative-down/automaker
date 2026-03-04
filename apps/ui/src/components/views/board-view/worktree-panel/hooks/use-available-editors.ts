@@ -4,6 +4,7 @@ import { useAppStore } from '@/store/app-store';
 import { useAvailableEditors as useAvailableEditorsQuery } from '@/hooks/queries';
 import { queryKeys } from '@/lib/query-keys';
 import type { EditorInfo } from '@automaker/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 // Re-export EditorInfo for convenience
 export type { EditorInfo };

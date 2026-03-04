@@ -24,6 +24,7 @@ import type {
 } from '@automaker/types';
 import { ModelOverrideTrigger } from '@/components/shared/model-override-trigger';
 import { useAppStore } from '@/store/app-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Normalize PhaseModelEntry or string to PhaseModelEntry

@@ -12,13 +12,14 @@ import { NewProjectModal } from '@/components/dialogs/new-project-modal';
 import { OnboardingDialog } from '@/components/layout/sidebar/dialogs';
 import { useProjectCreation } from '@/components/layout/sidebar/hooks';
 import {
-  MACOS_ELECTRON_TOP_PADDING_CLASS,
+  MACOS_TOP_PADDING_CLASS,
   SIDEBAR_FEATURE_FLAGS,
 } from '@/components/layout/sidebar/constants';
 import { initializeProject, hasAppSpec, hasAutomakerDir } from '@/lib/project-init';
 import { toast } from 'sonner';
 import { CreateSpecDialog } from '@/components/views/spec-view/dialogs';
 import type { FeatureCount } from '@/components/views/spec-view/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 function getOSAbbreviation(os: string): string {
   switch (os) {
@@ -301,7 +302,7 @@ export function ProjectSwitcher() {
         <div
           className={cn(
             'flex flex-col items-center pb-2 px-2',
-            isMac && false ? MACOS_ELECTRON_TOP_PADDING_CLASS : 'pt-3'
+            isMac && false ? MACOS_TOP_PADDING_CLASS : 'pt-3'
           )}
         >
           <button

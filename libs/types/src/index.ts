@@ -194,6 +194,7 @@ export {
   getDefaultThinkingLevel,
   EVENT_HOOK_TRIGGER_LABELS,
   DEFAULT_FEATURE_TEMPLATES,
+  CLAUDE_PROVIDER_TEMPLATES,
 } from './settings.js';
 
 // Model display constants

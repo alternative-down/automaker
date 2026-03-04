@@ -1,20 +1,27 @@
-// @ts-nocheck - GitHub issue validation with Electron API integration and async state
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
-import {
-  getElectronAPI,
-  GitHubIssue,
-  GitHubComment,
+import { getHttpApiClient } from '@/lib/http-api-client';
+import type {
   IssueValidationResult,
   IssueValidationEvent,
   StoredValidation,
-import type { LinkedPRInfo, PhaseModelEntry, ModelId } from '@automaker/types';
+  LinkedPRInfo,
+  PhaseModelEntry,
+  ModelId,
+} from '@automaker/types';
 import { useAppStore } from '@/store/app-store';
 import { toast } from 'sonner';
 import { isValidationStale } from '../utils';
 import { useValidateIssue, useMarkValidationViewed } from '@/hooks/mutations';
 
 const logger = createLogger('IssueValidation');
+
+interface GitHubIssue {
+  number: number;
+  title: string;
+  body: string;
+  labels?: string[];
+}
 
 interface UseIssueValidationOptions {
   selectedIssue: GitHubIssue | null;
@@ -31,111 +38,69 @@ export function useIssueValidation({
 }: UseIssueValidationOptions) {
   const { currentProject, phaseModels, muteDoneSound } = useAppStore();
   const [validatingIssues, setValidatingIssues] = useState<Set<number>>(new Set());
-  const [cachedValidations, setCachedValidations] = useState<Map<number, StoredValidation>>(
-    new Map()
-  );
+  const [cachedValidations, setCachedValidations] = useState<Map<number, StoredValidation>>(new Map());
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // React Query mutations
   const validateIssueMutation = useValidateIssue(currentProject?.path ?? '');
   const markViewedMutation = useMarkValidationViewed(currentProject?.path ?? '');
-  // Refs for stable event handler (avoids re-subscribing on state changes)
   const selectedIssueRef = useRef<GitHubIssue | null>(null);
   const showValidationDialogRef = useRef(false);
 
-  // Keep refs in sync with state for stable event handler
-  useEffect(() => {
-    selectedIssueRef.current = selectedIssue;
-  }, [selectedIssue]);
+  useEffect(() => { selectedIssueRef.current = selectedIssue; }, [selectedIssue]);
+  useEffect(() => { showValidationDialogRef.current = showValidationDialog; }, [showValidationDialog]);
 
-  useEffect(() => {
-    showValidationDialogRef.current = showValidationDialog;
-  }, [showValidationDialog]);
-
-  // Load cached validations on mount
   useEffect(() => {
     let isMounted = true;
-
     const loadCachedValidations = async () => {
       if (!currentProject?.path) return;
-
       try {
         const api = getHttpApiClient();
-        if (api.github?.getValidations) {
-          const result = await api.github.getValidations(currentProject.path);
-          if (isMounted && result.success && result.validations) {
-            const map = new Map<number, StoredValidation>();
-            for (const v of result.validations) {
-              map.set(v.issueNumber, v);
-            }
-            setCachedValidations(map);
-          }
+        const result = await api.github.getValidations(currentProject.path);
+        if (isMounted && result.success && result.validations) {
+          const map = new Map<number, StoredValidation>();
+          for (const v of result.validations) map.set(v.issueNumber, v);
+          setCachedValidations(map);
         }
       } catch (err) {
-        if (isMounted) {
-          logger.error('Failed to load cached validations:', err);
-        }
+        if (isMounted) logger.error('Failed to load cached validations:', err);
       }
     };
-
     loadCachedValidations();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [currentProject?.path]);
 
-  // Load running validations on mount (restore validatingIssues state)
   useEffect(() => {
     let isMounted = true;
-
     const loadRunningValidations = async () => {
       if (!currentProject?.path) return;
-
       try {
         const api = getHttpApiClient();
-        if (api.github?.getValidationStatus) {
-          const result = await api.github.getValidationStatus(currentProject.path);
-          if (isMounted && result.success && result.runningIssues) {
-            setValidatingIssues(new Set(result.runningIssues));
-          }
+        const result = await api.github.getValidationStatus(currentProject.path);
+        if (isMounted && result.success && result.runningIssues) {
+          setValidatingIssues(new Set(result.runningIssues));
         }
       } catch (err) {
-        if (isMounted) {
-          logger.error('Failed to load running validations:', err);
-        }
+        if (isMounted) logger.error('Failed to load running validations:', err);
       }
     };
-
     loadRunningValidations();
-
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false; };
   }, [currentProject?.path]);
 
-  // Subscribe to validation events
   useEffect(() => {
     const api = getHttpApiClient();
-    if (!api.github?.onValidationEvent) return;
-
     const handleValidationEvent = (event: IssueValidationEvent) => {
-      // Only handle events for current project
       if (event.projectPath !== currentProject?.path) return;
-
       switch (event.type) {
         case 'issue_validation_start':
           setValidatingIssues((prev) => new Set([...prev, event.issueNumber]));
           break;
-
         case 'issue_validation_complete':
           setValidatingIssues((prev) => {
             const next = new Set(prev);
             next.delete(event.issueNumber);
             return next;
           });
-
-          // Update cached validations (use event.model to avoid stale closure race condition)
           setCachedValidations((prev) => {
             const next = new Map(prev);
             next.set(event.issueNumber, {
@@ -147,166 +112,69 @@ export function useIssueValidation({
             });
             return next;
           });
-
-          // Show toast notification
-          toast.success(`Issue #${event.issueNumber} validated: ${event.result.verdict}`, {
-            description:
-              event.result.verdict === 'valid'
-                ? 'Issue is ready to be converted to a task'
-                : event.result.verdict === 'invalid'
-                  ? 'Issue may have problems'
-                  : 'Issue needs clarification',
-          });
-
-          // Play audio notification (if not muted)
+          toast.success(`Issue #${event.issueNumber} validated: ${event.result.verdict}`);
           if (!muteDoneSound) {
-            try {
-              if (!audioRef.current) {
-                audioRef.current = new Audio('/sounds/ding.mp3');
-              }
-              audioRef.current.play().catch(() => {
-                // Audio play might fail due to browser restrictions
-              });
-            } catch {
-              // Ignore audio errors
-            }
+            if (!audioRef.current) audioRef.current = new Audio('/sounds/ding.mp3');
+            audioRef.current.play().catch(() => {});
           }
-
-          // If validation dialog is open for this issue, update the result
-          if (
-            selectedIssueRef.current?.number === event.issueNumber &&
-            showValidationDialogRef.current
-          ) {
+          if (selectedIssueRef.current?.number === event.issueNumber && showValidationDialogRef.current) {
             onValidationResultChange(event.result);
           }
           break;
-
         case 'issue_validation_error':
           setValidatingIssues((prev) => {
             const next = new Set(prev);
             next.delete(event.issueNumber);
             return next;
           });
-          toast.error(`Validation failed for issue #${event.issueNumber}`, {
-            description: event.error,
-          });
-          if (
-            selectedIssueRef.current?.number === event.issueNumber &&
-            showValidationDialogRef.current
-          ) {
+          toast.error(`Validation failed for issue #${event.issueNumber}`, { description: event.error });
+          if (selectedIssueRef.current?.number === event.issueNumber && showValidationDialogRef.current) {
             onShowValidationDialogChange(false);
           }
           break;
       }
     };
-
     const unsubscribe = api.github.onValidationEvent(handleValidationEvent);
     return () => unsubscribe();
   }, [currentProject?.path, muteDoneSound, onValidationResultChange, onShowValidationDialogChange]);
 
-  // Cleanup audio element on unmount to prevent memory leaks
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
   const handleValidateIssue = useCallback(
-    async (
-      issue: GitHubIssue,
-      options: {
-        forceRevalidate?: boolean;
-        model?: ModelId | PhaseModelEntry; // Accept either model ID (backward compat) or PhaseModelEntry
-        modelEntry?: PhaseModelEntry; // New preferred way to pass model with thinking/reasoning
-        comments?: GitHubComment[];
-        linkedPRs?: LinkedPRInfo[];
-      } = {}
-    ) => {
-      const { forceRevalidate = false, model, modelEntry, comments, linkedPRs } = options;
+    async (issue: GitHubIssue, options: { forceRevalidate?: boolean; modelEntry?: PhaseModelEntry } = {}) => {
+      const { forceRevalidate = false, modelEntry } = options;
+      if (!currentProject?.path) { toast.error('No project selected'); return; }
+      if (validatingIssues.has(issue.number) || validateIssueMutation.isPending) return;
 
-      if (!currentProject?.path) {
-        toast.error('No project selected');
-        return;
-      }
-
-      // Check if already validating this issue
-      if (validatingIssues.has(issue.number) || validateIssueMutation.isPending) {
-        toast.info(`Validation already in progress for issue #${issue.number}`);
-        return;
-      }
-
-      // Check for cached result - if fresh, show it directly (unless force revalidate)
       const cached = cachedValidations.get(issue.number);
       if (cached && !forceRevalidate && !isValidationStale(cached.validatedAt)) {
-        // Show cached result directly
         onValidationResultChange(cached.result);
         onShowValidationDialogChange(true);
         return;
       }
 
-      // Use provided model override or fall back to phaseModels.validationModel
-      // Extract model string and thinking level from PhaseModelEntry (handles both old string format and new object format)
-      const effectiveModelEntry = modelEntry
-        ? modelEntry
-        : model
-          ? typeof model === 'string'
-            ? { model: model as ModelId }
-            : model
-          : phaseModels.validationModel;
-      const normalizedEntry =
-        typeof effectiveModelEntry === 'string'
-          ? { model: effectiveModelEntry as ModelId }
-          : effectiveModelEntry;
-      const modelToUse = normalizedEntry.model;
-      const thinkingLevelToUse = normalizedEntry.thinkingLevel;
-      const reasoningEffortToUse = normalizedEntry.reasoningEffort;
-
-      // Use mutation to trigger validation (toast is handled by mutation)
+      const effectiveEntry = modelEntry || phaseModels.validationModel;
       validateIssueMutation.mutate({
         issue,
-        model: modelToUse,
-        thinkingLevel: thinkingLevelToUse,
-        reasoningEffort: reasoningEffortToUse,
-        comments,
-        linkedPRs,
+        model: effectiveEntry.model,
+        thinkingLevel: effectiveEntry.thinkingLevel,
+        reasoningEffort: effectiveEntry.reasoningEffort,
       });
     },
-    [
-      currentProject?.path,
-      validatingIssues,
-      cachedValidations,
-      phaseModels.validationModel,
-      validateIssueMutation,
-      onValidationResultChange,
-      onShowValidationDialogChange,
-    ]
+    [currentProject?.path, validatingIssues, cachedValidations, phaseModels.validationModel, validateIssueMutation, onValidationResultChange, onShowValidationDialogChange]
   );
 
-  // View cached validation result
   const handleViewCachedValidation = useCallback(
     async (issue: GitHubIssue) => {
       const cached = cachedValidations.get(issue.number);
       if (cached) {
         onValidationResultChange(cached.result);
         onShowValidationDialogChange(true);
-
-        // Mark as viewed if not already viewed
         if (!cached.viewedAt && currentProject?.path) {
           markViewedMutation.mutate(issue.number, {
             onSuccess: () => {
-              // Update local state
               setCachedValidations((prev) => {
                 const next = new Map(prev);
                 const updated = prev.get(issue.number);
-                if (updated) {
-                  next.set(issue.number, {
-                    ...updated,
-                    viewedAt: new Date().toISOString(),
-                  });
-                }
+                if (updated) next.set(issue.number, { ...updated, viewedAt: new Date().toISOString() });
                 return next;
               });
             },
@@ -314,20 +182,8 @@ export function useIssueValidation({
         }
       }
     },
-    [
-      cachedValidations,
-      currentProject?.path,
-      markViewedMutation,
-      onValidationResultChange,
-      onShowValidationDialogChange,
-    ]
+    [cachedValidations, currentProject?.path, markViewedMutation, onValidationResultChange, onShowValidationDialogChange]
   );
 
-  return {
-    validatingIssues,
-    cachedValidations,
-    handleValidateIssue,
-    handleViewCachedValidation,
-    isValidating: validateIssueMutation.isPending,
-  };
+  return { validatingIssues, cachedValidations, handleValidateIssue, handleViewCachedValidation, isValidating: validateIssueMutation.isPending };
 }

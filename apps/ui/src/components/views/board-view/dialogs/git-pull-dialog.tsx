@@ -28,6 +28,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/store/app-store';
 import type { MergeConflictInfo } from '../worktree-panel/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface WorktreeInfo {
   path: string;

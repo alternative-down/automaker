@@ -429,7 +429,7 @@ export class GeminiProvider extends CliProvider {
    * Passes the prompt via stdin instead of --prompt CLI arg to:
    * - Avoid shell argument size limits with large prompts (system prompt + context)
    * - Avoid shell escaping issues with special characters in prompts
-   * - Match the pattern used by Cursor, OpenCode, and Codex providers
+   * - Match the pattern used by Codex providers
    *
    * Also injects environment variables to reduce Gemini CLI startup overhead:
    * - GEMINI_TELEMETRY_ENABLED=false: Disables OpenTelemetry collection

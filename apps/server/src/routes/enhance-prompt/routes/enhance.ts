@@ -196,7 +196,7 @@ export function createEnhanceHandler(
         logger.debug('Including project context in enhancement prompt');
       }
 
-      // Check if the model is a provider model (like "GLM-4.5-Air")
+      // Check if the model is a provider model
       // If so, get the provider config and resolved Claude model
       let claudeCompatibleProvider: import('@automaker/types').ClaudeCompatibleProvider | undefined;
       let providerResolvedModel: string | undefined;
@@ -220,7 +220,7 @@ export function createEnhanceHandler(
       }
 
       // Resolve the model for API call.
-      // CRITICAL: For custom providers (GLM, MiniMax), pass the provider's model ID (e.g. "GLM-4.7")
+      // CRITICAL: For custom providers, pass the provider's model ID
       // to the API, NOT the resolved Claude model - otherwise we get "model not found"
       const modelForApi = claudeCompatibleProvider
         ? model

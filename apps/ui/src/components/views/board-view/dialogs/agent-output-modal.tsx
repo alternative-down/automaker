@@ -16,6 +16,7 @@ import { useAppStore } from '@/store/app-store';
 import { extractSummary } from '@/lib/log-parser';
 import { useAgentOutput } from '@/hooks/queries';
 import type { BacklogPlanEvent } from '@automaker/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface AgentOutputModalProps {
   open: boolean;

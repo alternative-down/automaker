@@ -48,6 +48,7 @@ import {
 import { WorktreeDirectoryDropdown } from './components/worktree-directory-dropdown';
 import { GitDetailPanel } from './components/git-detail-panel';
 import { AddFeatureDialog } from '@/components/views/board-view/dialogs';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('FileEditorView');
 

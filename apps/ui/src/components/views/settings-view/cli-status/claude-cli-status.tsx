@@ -8,6 +8,7 @@ import type { CliStatus } from '../shared/types';
 import type { ClaudeAuthStatus } from '@/store/setup-store';
 import { AnthropicIcon } from '@/components/ui/provider-icon';
 import { toast } from 'sonner';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface CliStatusProps {
   status: CliStatus | null;

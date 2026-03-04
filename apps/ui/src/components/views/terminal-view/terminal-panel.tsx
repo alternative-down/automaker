@@ -731,14 +731,14 @@ export function TerminalPanel({
       terminal.loadAddon(searchAddon);
       searchAddonRef.current = searchAddon;
 
-      // Create web links addon for clickable URLs with custom handler for Electron
+      // Create web links addon for clickable URLs with custom desktop handler
       const webLinksAddon = new WebLinksAddon((_event: MouseEvent, uri: string) => {
-        // Use Electron API to open external links in system browser
+        // Use desktop bridge API to open external links in system browser
         const api = getHttpApiClient();
         if (api?.openExternalLink) {
           api.openExternalLink(uri).catch((error) => {
             logger.error('Failed to open URL:', error);
-            // Fallback to window.open if Electron API fails
+            // Fallback to window.open if bridge API fails
             window.open(uri, '_blank', 'noopener,noreferrer');
           });
         } else {
@@ -854,7 +854,7 @@ export function TerminalPanel({
                 }
 
                 // Open in editor using VS Code URL scheme
-                // Works in both web (via anchor click) and Electron (via shell.openExternal)
+                // Works in web (anchor click) and desktop bridge (shell.openExternal)
                 try {
                   const result = await api.openInEditor?.(absolutePath, clickedLine, clickedCol);
                   if (result && !result.success) {
@@ -1126,7 +1126,7 @@ export function TerminalPanel({
       // Build WebSocket URL with auth params
       let url = `${wsUrl}/api/terminal/ws?sessionId=${sessionId}`;
 
-      // Add API key for Electron mode auth
+      // Add API key for desktop mode auth
       const apiKey = getApiKey();
       if (apiKey) {
         url += `&apiKey=${encodeURIComponent(apiKey)}`;
@@ -1795,13 +1795,13 @@ export function TerminalPanel({
     });
   }, []);
 
-  // Save image to temp folder via Electron API
+  // Save image to temp folder via bridge API
   const saveImageToTemp = useCallback(
     async (base64Data: string, filename: string, mimeType: string): Promise<string | null> => {
       try {
         const api = getHttpApiClient();
         if (!api.saveImageToTemp) {
-          // Fallback path when Electron API is not available (browser mode)
+          // Fallback path when bridge API is not available (browser mode)
           logger.warn('saveImageToTemp not available, returning fallback path');
           return `.automaker/images/${Date.now()}_${filename}`;
         }

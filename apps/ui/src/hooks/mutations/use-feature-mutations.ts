@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { Feature } from '@/store/app-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Create a new feature

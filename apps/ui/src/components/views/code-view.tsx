@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { File, Folder, FolderOpen, ChevronRight, ChevronDown, Code, RefreshCw } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('CodeView');
 

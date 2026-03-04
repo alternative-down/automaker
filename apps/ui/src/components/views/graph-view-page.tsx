@@ -16,6 +16,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { createLogger } from '@automaker/utils/logger';
 import { toast } from 'sonner';
 import type { BacklogPlanResult } from '@automaker/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('GraphViewPage');
 

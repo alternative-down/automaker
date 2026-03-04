@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { StatusBadge, TerminalOutput } from '../components';
 import { useCliStatus, useCliInstallation, useTokenSave } from '../hooks';
 import { AnthropicIcon } from '@/components/ui/provider-icon';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface ClaudeSetupStepProps {
   onNext: () => void;
@@ -69,15 +70,15 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
   const [isDeletingApiKey, setIsDeletingApiKey] = useState(false);
 
   // Memoize API functions to prevent infinite loops
-  const statusApi = useCallback(
-    () => .setup?.getClaudeStatus() || Promise.reject(),
-    []
-  );
+  const statusApi = useCallback(() => {
+    const api = getHttpApiClient();
+    return api.setup?.getClaudeStatus() || Promise.reject();
+  }, []);
 
-  const installApi = useCallback(
-    () => .setup?.installClaude() || Promise.reject(),
-    []
-  );
+  const installApi = useCallback(() => {
+    const api = getHttpApiClient();
+    return api.setup?.installClaude() || Promise.reject();
+  }, []);
 
   const getStoreState = useCallback(() => useSetupStore.getState().claudeCliStatus, []);
 
@@ -96,7 +97,7 @@ export function ClaudeSetupStep({ onNext, onBack, onSkip }: ClaudeSetupStepProps
   const { isInstalling, installProgress, install } = useCliInstallation({
     cliType: 'claude',
     installApi,
-    onProgressEvent: .setup?.onInstallProgress,
+    onProgressEvent: getHttpApiClient().setup?.onInstallProgress,
     onSuccess: onInstallSuccess,
     getStoreState,
   });

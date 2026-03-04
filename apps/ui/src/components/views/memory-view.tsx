@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Markdown } from '../ui/markdown';
+import { getHttpApiClient } from '@/lib/http-api-client';
 import {
   DropdownMenu,
   DropdownMenuContent,
