@@ -21,7 +21,19 @@ if (isPwaStandalone) {
 // Note: The SW itself does NOT call skipWaiting() on install, so a newly
 // registered SW won't disrupt a live page — it waits for SKIP_WAITING from the
 // main thread or for all old-SW tabs to close before activating.
-if ('serviceWorker' in navigator && !window.location.protocol.startsWith('file')) {
+const enableServiceWorker = import.meta.env.VITE_ENABLE_SW === 'true';
+
+if (!enableServiceWorker && 'serviceWorker' in navigator) {
+  // Explicitly unregister previously installed service workers to avoid stale chunk/cache issues.
+  void navigator.serviceWorker.getRegistrations().then((registrations) => {
+    registrations.forEach((r) => void r.unregister());
+  });
+  if ('caches' in window) {
+    void caches.keys().then((keys) => keys.forEach((k) => void caches.delete(k)));
+  }
+}
+
+if (enableServiceWorker && 'serviceWorker' in navigator && !window.location.protocol.startsWith('file')) {
   navigator.serviceWorker
     .register('/sw.js', {
       // Check for updates on every page load for PWA freshness

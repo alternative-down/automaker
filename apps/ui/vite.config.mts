@@ -122,7 +122,8 @@ export default defineConfig(({ command }) => {
     plugins: [
       TanStackRouterVite({
         target: 'react',
-        autoCodeSplitting: true,
+        // Avoid route-level lazy chunks in production deployments to prevent stale chunk 404s.
+        autoCodeSplitting: false,
         routesDirectory: './src/routes',
         generatedRouteTree: './src/routeTree.gen.ts',
       }),
