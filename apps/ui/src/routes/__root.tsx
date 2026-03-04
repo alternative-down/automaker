@@ -109,6 +109,16 @@ function RootLayoutContent() {
     return <LoadingState message="Loading Automaker..." />;
   }
 
+  // Keep login screen isolated from app shell (no sidebar/background interaction)
+  if (isLoginRoute) {
+    return (
+      <main className="h-full w-full overflow-hidden" data-testid="auth-container">
+        <Outlet />
+        <Toaster richColors position="bottom-right" />
+      </main>
+    );
+  }
+
   return (
     <main className="flex h-full overflow-hidden" data-testid="app-container">
       {sidebarStyle === 'discord' && <ProjectSwitcher />}
