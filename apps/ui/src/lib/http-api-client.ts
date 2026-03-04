@@ -52,6 +52,8 @@ const getServerUrl = (): string => {
   if (typeof window !== 'undefined') {
     const envUrl = import.meta.env.VITE_SERVER_URL;
     if (envUrl) return envUrl;
+    // In deployed web mode, use same-origin and let /api proxy handle backend routing.
+    return window.location.origin;
   }
   const hostname = import.meta.env.VITE_HOSTNAME || 'localhost';
   return `http://${hostname}:3008`;

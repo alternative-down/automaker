@@ -22,6 +22,8 @@ services:
     environment:
       AUTOMAKER_WEB_PORT: 3007
       AUTOMAKER_SERVER_PORT: 3008
+      # Internal server URL over docker network (two-container deployment)
+      AUTOMAKER_SERVER_URL: http://server:3008
     depends_on:
       - server
     ports:

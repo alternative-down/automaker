@@ -144,7 +144,10 @@ export default defineConfig(({ command }) => {
       allowedHosts: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:' + (process.env.AUTOMAKER_SERVER_PORT ?? '3008'),
+          // Two-container mode: point UI container proxy to server container via docker network.
+          target:
+            process.env.AUTOMAKER_SERVER_URL ||
+            `http://server:${process.env.AUTOMAKER_SERVER_PORT ?? '3008'}`,
           changeOrigin: true,
           ws: true,
         },
