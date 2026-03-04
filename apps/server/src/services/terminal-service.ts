@@ -15,6 +15,9 @@ import {
 
 const logger = createLogger('Terminal');
 
+export const MIN_MAX_SESSIONS = 1;
+export const MAX_MAX_SESSIONS = 50;
+
 export interface TerminalSession {
   id: string;
   pty: pty.IPty;
@@ -29,6 +32,7 @@ export interface TerminalSession {
 export class TerminalService extends EventEmitter {
   private sessions: Map<string, TerminalSession> = new Map();
   private isWindows = os.platform() === 'win32';
+  private maxSessions = 10;
 
   constructor(private settingsService?: SettingsService) {
     super();
@@ -110,6 +114,55 @@ export class TerminalService extends EventEmitter {
   getScrollbackAndClearPending(sessionId: string) {
     const session = this.sessions.get(sessionId);
     return session?.scrollbackBuffer || null;
+  }
+
+  killSession(sessionId: string): boolean {
+    const session = this.sessions.get(sessionId);
+    if (!session) return false;
+    try {
+      session.pty.kill();
+    } catch {}
+    this.sessions.delete(sessionId);
+    return true;
+  }
+
+  getAllSessions() {
+    return Array.from(this.sessions.values()).map((s) => ({
+      id: s.id,
+      cwd: s.cwd,
+      shell: s.shell,
+      createdAt: s.createdAt,
+    }));
+  }
+
+  getSessionCount(): number {
+    return this.sessions.size;
+  }
+
+  getMaxSessions(): number {
+    return this.maxSessions;
+  }
+
+  setMaxSessions(max: number): void {
+    const clamped = Math.min(MAX_MAX_SESSIONS, Math.max(MIN_MAX_SESSIONS, max));
+    this.maxSessions = clamped;
+  }
+
+  getPlatformInfo() {
+    return {
+      platform: os.platform(),
+      shellPaths: getShellPaths(),
+    };
+  }
+
+  onData(cb: (sessionId: string, data: string) => void): () => void {
+    this.on('data', cb);
+    return () => this.off('data', cb);
+  }
+
+  onExit(cb: (sessionId: string, exitCode: number) => void): () => void {
+    this.on('exit', cb);
+    return () => this.off('exit', cb);
   }
 
   cleanup(): void {

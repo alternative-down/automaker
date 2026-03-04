@@ -149,3 +149,73 @@ export async function findClaudeCliPath(): Promise<string | null> {
 export async function findCodexCliPath(): Promise<string | null> {
   return findFirstExistingPath(getCodexCliPaths());
 }
+
+// ---- Compatibility exports for legacy server imports ----
+export const systemPaths = {
+  github: getGitHubCliPaths,
+  claude: getClaudeCliPaths,
+  codex: getCodexCliPaths,
+};
+
+export async function systemPathAccess(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function systemPathReadFile(filePath: string, encoding: BufferEncoding = 'utf8'): Promise<string> {
+  return fs.readFile(filePath, { encoding }) as unknown as Promise<string>;
+}
+
+export function getExtendedPath(_options?: { includeNvm?: boolean; includeFnm?: boolean }): string {
+  return process.env.PATH || '';
+}
+
+export function getCodexConfigDir(): string {
+  return path.join(os.homedir(), '.codex');
+}
+
+export function getCodexAuthPath(): string {
+  return path.join(getCodexConfigDir(), 'auth.json');
+}
+
+export function getClaudeAuthIndicators(): { hasCredentialsFile: boolean; hasApiKey: boolean } {
+  const credentialsPath = path.join(getClaudeConfigDir(), '.credentials.json');
+  return {
+    hasCredentialsFile: fsSync.existsSync(credentialsPath),
+    hasApiKey: Boolean(process.env.ANTHROPIC_API_KEY),
+  };
+}
+
+export function getCodexAuthIndicators(): { hasCredentialsFile: boolean; hasApiKey: boolean } {
+  const authPath = getCodexAuthPath();
+  return {
+    hasCredentialsFile: fsSync.existsSync(authPath),
+    hasApiKey: Boolean(process.env.OPENAI_API_KEY),
+  };
+}
+
+export function getOpenCodeAuthIndicators(): { hasCredentialsFile: boolean; hasApiKey: boolean } {
+  return {
+    hasCredentialsFile: false,
+    hasApiKey: false,
+  };
+}
+
+export function getShellPaths(): string[] {
+  if (process.platform === 'win32') {
+    return ['C:/Program Files/Git/bin/bash.exe', 'C:/Windows/System32/WindowsPowerShell/v1.0/powershell.exe'];
+  }
+  return ['/bin/bash', '/bin/zsh', '/bin/sh'];
+}
+
+export function findGitBashPath(): string | null {
+  const candidates = ['C:/Program Files/Git/bin/bash.exe', 'C:/Program Files (x86)/Git/bin/bash.exe'];
+  for (const p of candidates) {
+    if (fsSync.existsSync(p)) return p;
+  }
+  return null;
+}
