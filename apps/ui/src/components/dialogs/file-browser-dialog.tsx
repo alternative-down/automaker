@@ -58,7 +58,9 @@ export function FileBrowserDialog({
   const [warning, setWarning] = useState('');
 
   // Use recent folders from app store (synced via API)
-  const recentFolders = useAppStore((s) => s.recentFolders);
+  const recentFolders = useAppStore((s) =>
+    Array.isArray(s.recentFolders) ? s.recentFolders : []
+  );
   const setRecentFolders = useAppStore((s) => s.setRecentFolders);
   const addRecentFolder = useAppStore((s) => s.addRecentFolder);
 
@@ -82,8 +84,8 @@ export function FileBrowserDialog({
       if (result.success) {
         setCurrentPath(result.currentPath);
         setParentPath(result.parentPath);
-        setDirectories(result.directories);
-        setDrives(result.drives || []);
+        setDirectories(Array.isArray(result.directories) ? result.directories : []);
+        setDrives(Array.isArray(result.drives) ? result.drives : []);
         setWarning(result.warning || '');
       } else {
         setError(result.error || 'Failed to browse directory');
