@@ -4,7 +4,6 @@ import { createLogger } from '@automaker/utils/logger';
 import { router } from './utils/router';
 import { SplashScreen } from './components/splash-screen';
 import { useSettingsSync } from './hooks/use-settings-sync';
-import { useCursorStatusInit } from './hooks/use-cursor-status-init';
 import { useProviderAuthInit } from './hooks/use-provider-auth-init';
 import { useMobileVisibility, useMobileOnlineManager } from './hooks/use-mobile-visibility';
 import { useAppStore } from './store/app-store';
@@ -95,10 +94,7 @@ export default function App() {
     logger.error('Settings sync error:', settingsSyncState.error);
   }
 
-  // Initialize Cursor CLI status at startup
-  useCursorStatusInit();
-
-  // Initialize Provider auth status at startup (for Claude/Codex usage display)
+  // Initialize Provider auth status at startup (for Claude/Codex/Gemini usage display)
   useProviderAuthInit();
 
   // Mobile-specific: Manage React Query focus/online state based on page visibility.
