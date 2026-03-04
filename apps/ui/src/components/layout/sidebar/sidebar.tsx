@@ -73,6 +73,10 @@ export function Sidebar() {
 
   const isCompact = useIsCompact();
 
+  const safeProjects = Array.isArray(projects) ? projects : [];
+  const safeTrashedProjects = Array.isArray(trashedProjects) ? trashedProjects : [];
+  const safeProjectHistory = Array.isArray(projectHistory) ? projectHistory : [];
+
   // Environment variable flags for hiding sidebar items
   const { hideTerminal, hideRunningAgents, hideContext, hideSpecEditor, hideWiki } =
     SIDEBAR_FEATURE_FLAGS;
@@ -265,8 +269,8 @@ export function Sidebar() {
     hideContext,
     hideTerminal,
     currentProject,
-    projects,
-    projectHistory,
+    projects: safeProjects,
+    projectHistory: safeProjectHistory,
     navigate,
     toggleSidebar,
     handleOpenFolder,
@@ -467,7 +471,7 @@ export function Sidebar() {
         <TrashDialog
           open={showTrashDialog}
           onOpenChange={setShowTrashDialog}
-          trashedProjects={trashedProjects}
+          trashedProjects={safeTrashedProjects}
           activeTrashId={activeTrashId}
           handleRestoreProject={handleRestoreProject}
           handleDeleteProjectFromDisk={handleDeleteProjectFromDisk}
