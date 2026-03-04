@@ -212,6 +212,7 @@ async function checkServerAndSession(
 
 async function checkSetupStatus(
   dispatch: React.Dispatch<Action>,
+  setAuthState: (state: { settingsLoaded: boolean }) => void,
   signal?: AbortSignal
 ): Promise<void> {
   const httpClient = getHttpApiClient();
@@ -229,15 +230,17 @@ async function checkSetupStatus(
       // This is set to true when user completes the setup wizard
       const setupComplete = (result.settings as { setupComplete?: boolean }).setupComplete === true;
 
-      // IMPORTANT: Update the Zustand store BEFORE redirecting
-      // Otherwise __root.tsx routing effect will override our redirect
-      // because it reads setupComplete from the store (which defaults to false)
+      // IMPORTANT: Update stores BEFORE redirecting
+      // - setup store controls destination
+      // - auth store settingsLoaded gate controls root loading screen
       useSetupStore.getState().setSetupComplete(setupComplete);
+      setAuthState({ settingsLoaded: true });
 
       dispatch({ type: 'REDIRECT', to: setupComplete ? '/' : '/setup' });
     } else {
       // No settings yet = first run = need setup
       useSetupStore.getState().setSetupComplete(false);
+      setAuthState({ settingsLoaded: true });
       dispatch({ type: 'REDIRECT', to: '/setup' });
     }
   } catch {
@@ -247,6 +250,7 @@ async function checkSetupStatus(
     }
     // If we can't get settings, go to setup to be safe
     useSetupStore.getState().setSetupComplete(false);
+    setAuthState({ settingsLoaded: true });
     dispatch({ type: 'REDIRECT', to: '/setup' });
   }
 }
@@ -306,7 +310,7 @@ export function LoginView() {
   useEffect(() => {
     if (state.phase === 'checking_setup') {
       const controller = new AbortController();
-      checkSetupStatus(dispatch, controller.signal);
+      checkSetupStatus(dispatch, setAuthState, controller.signal);
 
       return () => {
         controller.abort();
