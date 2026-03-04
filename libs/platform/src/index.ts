@@ -98,6 +98,17 @@ export {
   findFirstExistingPath,
   findClaudeCliPath,
   findCodexCliPath,
+  systemPaths,
+  systemPathAccess,
+  systemPathReadFile,
+  getExtendedPath,
+  getCodexConfigDir,
+  getCodexAuthPath,
+  getClaudeAuthIndicators,
+  getCodexAuthIndicators,
+  getOpenCodeAuthIndicators,
+  getShellPaths,
+  findGitBashPath,
 } from './system-paths.js';
 
 // Port configuration
