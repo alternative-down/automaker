@@ -24,6 +24,10 @@ const sectionIcons: Record<string, React.ComponentType<{ className?: string }>> 
   GitHub: Github,
 };
 
+const EMPTY_COLLAPSED_SECTIONS: Record<string, boolean> = {};
+const NOOP_SET_COLLAPSED_SECTIONS = (_next: Record<string, boolean>) => {};
+const NOOP_TOGGLE_NAV_SECTION = (_label: string) => {};
+
 interface SidebarNavigationProps {
   currentProject: Project | null;
   sidebarOpen: boolean;
@@ -46,11 +50,21 @@ export function SidebarNavigation({
   const navRef = useRef<HTMLElement>(null);
 
   // Get collapsed state from store (persisted across restarts)
-  const collapsedNavSections = useAppStore((s: any) => s.collapsedNavSections || {});
-  const setCollapsedNavSections = useAppStore(
-    (s: any) => s.setCollapsedNavSections || ((_next: Record<string, boolean>) => {})
-  );
-  const toggleNavSection = useAppStore((s: any) => s.toggleNavSection || ((_label: string) => {}));
+  const collapsedNavSectionsRaw = useAppStore((s: any) => s.collapsedNavSections);
+  const setCollapsedNavSectionsRaw = useAppStore((s: any) => s.setCollapsedNavSections);
+  const toggleNavSectionRaw = useAppStore((s: any) => s.toggleNavSection);
+
+  const collapsedNavSections =
+    collapsedNavSectionsRaw && typeof collapsedNavSectionsRaw === 'object'
+      ? collapsedNavSectionsRaw
+      : EMPTY_COLLAPSED_SECTIONS;
+  const setCollapsedNavSections =
+    typeof setCollapsedNavSectionsRaw === 'function'
+      ? setCollapsedNavSectionsRaw
+      : NOOP_SET_COLLAPSED_SECTIONS;
+  const toggleNavSection =
+    typeof toggleNavSectionRaw === 'function' ? toggleNavSectionRaw : NOOP_TOGGLE_NAV_SECTION;
+  const safeNavSections = Array.isArray(navSections) ? navSections : [];
 
   // Initialize collapsed state when sections change (e.g., GitHub section appears)
   // Only set defaults for sections that don't have a persisted state
@@ -58,7 +72,7 @@ export function SidebarNavigation({
     let hasNewSections = false;
     const updated = { ...collapsedNavSections };
 
-    navSections.forEach((section) => {
+    safeNavSections.forEach((section) => {
       if (section.collapsible && section.label && !(section.label in updated)) {
         updated[section.label] = section.defaultCollapsed ?? false;
         hasNewSections = true;
@@ -68,7 +82,7 @@ export function SidebarNavigation({
     if (hasNewSections) {
       setCollapsedNavSections(updated);
     }
-  }, [navSections, collapsedNavSections, setCollapsedNavSections]);
+  }, [safeNavSections, collapsedNavSections, setCollapsedNavSections]);
 
   // Check scroll state
   const checkScrollState = useCallback(() => {
@@ -95,7 +109,7 @@ export function SidebarNavigation({
   }, [checkScrollState, collapsedNavSections]);
 
   // Filter sections: always show non-project sections, only show project sections when project exists
-  const visibleSections = navSections.filter((section) => {
+  const visibleSections = safeNavSections.filter((section) => {
     // Always show Dashboard (first section with no label)
     if (!section.label && section.items.some((item) => item.id === 'overview')) {
       return true;

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 
 interface UseSidebarAutoCollapseProps {
   sidebarOpen: boolean;
-  toggleSidebar: () => void;
+  toggleSidebar?: () => void;
 }
 
 export function useSidebarAutoCollapse({
@@ -13,10 +13,14 @@ export function useSidebarAutoCollapse({
 
   // Auto-collapse sidebar on small screens
   useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
+      return;
+    }
+
     const mediaQuery = window.matchMedia('(max-width: 1024px)'); // lg breakpoint
 
     const handleResize = () => {
-      if (mediaQuery.matches && sidebarOpen) {
+      if (mediaQuery.matches && sidebarOpen && typeof toggleSidebar === 'function') {
         // Auto-collapse on small screens
         toggleSidebar();
       }
