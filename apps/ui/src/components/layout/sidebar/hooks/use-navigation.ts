@@ -45,8 +45,8 @@ interface UseNavigationProps {
   hideContext: boolean;
   hideTerminal: boolean;
   currentProject: Project | null;
-  projects: Project[];
-  projectHistory: string[];
+  projects?: Project[];
+  projectHistory?: string[];
   navigate: (opts: NavigateOptions) => void;
   toggleSidebar: () => void;
   handleOpenFolder: () => void;
@@ -77,6 +77,9 @@ export function useNavigation({
   unreadNotificationsCount,
   isSpecGenerating,
 }: UseNavigationProps) {
+  const safeProjects = Array.isArray(projects) ? projects : [];
+  const safeProjectHistory = Array.isArray(projectHistory) ? projectHistory : [];
+
   // Track if current project has a GitHub remote
   const [hasGitHubRemote, setHasGitHubRemote] = useState(false);
 
@@ -91,10 +94,11 @@ export function useNavigation({
         const api = getHttpApiClient();
         if (api.github) {
           const result = await api.github.checkRemote(currentProject.path);
-          setHasGitHubRemote(result.success && result.hasGitHubRemote === true);
+          const next = result.success && result.hasGitHubRemote === true;
+          setHasGitHubRemote((prev) => (prev === next ? prev : next));
         }
       } catch {
-        setHasGitHubRemote(false);
+        setHasGitHubRemote((prev) => (prev ? false : prev));
       }
     }
 
@@ -282,7 +286,7 @@ export function useNavigation({
     });
 
     // Project cycling shortcuts - only when we have project history
-    if (projectHistory.length > 1) {
+    if (safeProjectHistory.length > 1) {
       shortcutsList.push({
         key: shortcuts.cyclePrevProject,
         action: () => cyclePrevProject(),
@@ -324,9 +328,9 @@ export function useNavigation({
     currentProject,
     navigate,
     toggleSidebar,
-    projects.length,
+    safeProjects.length,
     handleOpenFolder,
-    projectHistory.length,
+    safeProjectHistory.length,
     cyclePrevProject,
     cycleNextProject,
     navSections,
