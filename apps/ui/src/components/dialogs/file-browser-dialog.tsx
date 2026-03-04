@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { FolderOpen, Folder, ChevronRight, HardDrive, Clock, X } from 'lucide-react';
 import {
   Dialog,
@@ -58,11 +58,15 @@ export function FileBrowserDialog({
   const [warning, setWarning] = useState('');
 
   // Use recent folders from app store (synced via API)
-  const recentFolders = useAppStore((s) =>
-    Array.isArray(s.recentFolders) ? s.recentFolders : []
+  const recentFoldersFromStore = useAppStore((s) => s.recentFolders);
+  const recentFolders = useMemo(
+    () => (Array.isArray(recentFoldersFromStore) ? recentFoldersFromStore : []),
+    [recentFoldersFromStore]
   );
   const setRecentFolders = useAppStore((s) => s.setRecentFolders);
   const addRecentFolder = useAppStore((s) => s.addRecentFolder);
+
+  const hasInitializedRef = useRef(false);
 
   const handleRemoveRecent = useCallback(
     (e: React.MouseEvent, path: string) => {
@@ -117,40 +121,46 @@ export function FileBrowserDialog({
 
   // Load initial path or workspace directory when dialog opens
   useEffect(() => {
-    if (open && !currentPath) {
-      // Priority order:
-      // 1. Last selected directory from this file browser (from localStorage)
-      // 2. initialPath prop (from parent component)
-      // 3. Default workspace directory
-      // 4. Home directory
-      const loadInitialPath = async () => {
-        try {
-          // First, check for last selected directory from getDefaultWorkspaceDirectory
-          // which already implements the priority: last used > Documents/Automaker > DATA_DIR
-          const defaultDir = await getDefaultWorkspaceDirectory();
-
-          // If we have a default directory, use it (unless initialPath is explicitly provided and different)
-          const pathToUse = initialPath || defaultDir;
-
-          if (pathToUse) {
-            browseDirectory(pathToUse);
-          } else {
-            // No default directory, browse home directory
-            browseDirectory();
-          }
-        } catch {
-          // If config fetch fails, try initialPath or fall back to home directory
-          if (initialPath) {
-            browseDirectory(initialPath);
-          } else {
-            browseDirectory();
-          }
-        }
-      };
-
-      loadInitialPath();
+    if (!open) {
+      hasInitializedRef.current = false;
+      return;
     }
-  }, [open, initialPath, currentPath, browseDirectory]);
+
+    if (hasInitializedRef.current) return;
+    hasInitializedRef.current = true;
+
+    // Priority order:
+    // 1. Last selected directory from this file browser (from localStorage)
+    // 2. initialPath prop (from parent component)
+    // 3. Default workspace directory
+    // 4. Home directory
+    const loadInitialPath = async () => {
+      try {
+        // First, check for last selected directory from getDefaultWorkspaceDirectory
+        // which already implements the priority: last used > Documents/Automaker > DATA_DIR
+        const defaultDir = await getDefaultWorkspaceDirectory();
+
+        // If we have a default directory, use it (unless initialPath is explicitly provided and different)
+        const pathToUse = initialPath || defaultDir;
+
+        if (pathToUse) {
+          browseDirectory(pathToUse);
+        } else {
+          // No default directory, browse home directory
+          browseDirectory();
+        }
+      } catch {
+        // If config fetch fails, try initialPath or fall back to home directory
+        if (initialPath) {
+          browseDirectory(initialPath);
+        } else {
+          browseDirectory();
+        }
+      }
+    };
+
+    loadInitialPath();
+  }, [open, initialPath, browseDirectory]);
 
   const handleSelectDirectory = (dir: DirectoryEntry) => {
     browseDirectory(dir.path);
@@ -179,7 +189,7 @@ export function FileBrowserDialog({
       onSelect(currentPath);
       onOpenChange(false);
     }
-  }, [currentPath, onSelect, onOpenChange]);
+  }, [currentPath, addRecentFolder, onSelect, onOpenChange]);
 
   // Handle Command/Ctrl+Enter keyboard shortcut to select current folder
   useEffect(() => {
@@ -198,6 +208,9 @@ export function FileBrowserDialog({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [open, currentPath, loading, handleSelect]);
+
+  const safeDirectories = Array.isArray(directories) ? directories : [];
+  const safeDrives = Array.isArray(drives) ? drives : [];
 
   // Helper to get folder name from path
   const getFolderName = (path: string) => {
@@ -227,7 +240,7 @@ export function FileBrowserDialog({
             error={!!error}
             onNavigate={handleNavigate}
             onHome={handleGoHome}
-            entries={directories.map((dir) => ({ ...dir, isDirectory: true }))}
+            entries={safeDirectories.map((dir) => ({ ...dir, isDirectory: true }))}
             onSelectEntry={(entry) => {
               if (entry.isDirectory) {
                 handleSelectDirectory(entry);
@@ -236,7 +249,7 @@ export function FileBrowserDialog({
           />
 
           {/* Recent folders */}
-          {recentFolders.length > 0 && (
+          {Array.isArray(recentFolders) && recentFolders.length > 0 && (
             <div className="flex flex-wrap gap-1.5 p-2 rounded-md bg-sidebar-accent/10 border border-sidebar-border">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mr-1">
                 <Clock className="w-3 h-3" />
@@ -265,13 +278,13 @@ export function FileBrowserDialog({
           )}
 
           {/* Drives selector (Windows only) */}
-          {drives.length > 0 && (
+          {safeDrives.length > 0 && (
             <div className="flex flex-wrap gap-1.5 p-2 rounded-md bg-sidebar-accent/10 border border-sidebar-border">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mr-1">
                 <HardDrive className="w-3 h-3" />
                 <span>Drives:</span>
               </div>
-              {drives.map((drive) => (
+              {safeDrives.map((drive) => (
                 <Button
                   key={drive}
                   variant={currentPath.startsWith(drive) ? 'default' : 'outline'}
@@ -314,7 +327,7 @@ export function FileBrowserDialog({
 
             {!loading && !error && directories.length > 0 && (
               <div className="divide-y divide-sidebar-border">
-                {directories.map((dir) => (
+                {safeDirectories.map((dir) => (
                   <button
                     key={dir.path}
                     onClick={() => handleSelectDirectory(dir)}
