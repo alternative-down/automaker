@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label';
 import { GitPullRequest } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface WorktreeInfo {
   path: string;

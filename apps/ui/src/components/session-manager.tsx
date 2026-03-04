@@ -25,6 +25,7 @@ import { useSessions } from '@/hooks/queries';
 import { queryKeys } from '@/lib/query-keys';
 import { DeleteSessionDialog } from '@/components/dialogs/delete-session-dialog';
 import { DeleteAllArchivedSessionsDialog } from '@/components/dialogs/delete-all-archived-sessions-dialog';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 // Random session name generator
 const adjectives = [

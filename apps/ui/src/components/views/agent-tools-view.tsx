@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Terminal, CheckCircle, XCircle, Play, File, Pencil, Wrench } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('AgentToolsView');
 

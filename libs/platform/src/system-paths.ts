@@ -66,10 +66,7 @@ export function getCodexCliPaths(): string[] {
       ...getNvmWindowsCliPaths('codex'),
     ];
   }
-  return [
-    path.join(homeDir, '.local', 'bin', 'codex'),
-    '/usr/local/bin/codex',
-  ];
+  return [path.join(homeDir, '.local', 'bin', 'codex'), '/usr/local/bin/codex'];
 }
 
 export function getClaudeConfigDir(): string {
@@ -82,6 +79,55 @@ export function getClaudeSettingsPath(): string {
 
 export function systemPathExists(filePath: string): boolean {
   return fsSync.existsSync(filePath);
+}
+
+export function systemPathIsExecutable(filePath: string): boolean {
+  try {
+    fsSync.accessSync(filePath, fsSync.constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function systemPathReaddirSync(dirPath: string): string[] {
+  try {
+    return fsSync.readdirSync(dirPath);
+  } catch {
+    return [];
+  }
+}
+
+export function systemPathReadFileSync(filePath: string, encoding: BufferEncoding = 'utf8'): string {
+  return fsSync.readFileSync(filePath, { encoding });
+}
+
+export function getNvmPaths(): string[] {
+  const home = os.homedir();
+  return [path.join(home, '.nvm', 'versions', 'node')];
+}
+
+export function getFnmPaths(): string[] {
+  const home = os.homedir();
+  return [path.join(home, '.fnm', 'node-versions')];
+}
+
+export function getNodeSystemPaths(): string[] {
+  return ['/usr/local/bin/node', '/usr/bin/node', path.join(os.homedir(), '.local', 'bin', 'node')];
+}
+
+export function getScoopNodePath(): string {
+  const home = os.homedir();
+  return path.join(home, 'scoop', 'apps', 'nodejs', 'current', 'node.exe');
+}
+
+export function getChocolateyNodePath(): string {
+  return path.join(process.env.ALLUSERSPROFILE || 'C:\\ProgramData', 'chocolatey', 'bin', 'node.exe');
+}
+
+export function getWslVersionPath(): string | null {
+  const candidate = '/proc/version';
+  return fsSync.existsSync(candidate) ? candidate : null;
 }
 
 export async function findFirstExistingPath(paths: string[]): Promise<string | null> {

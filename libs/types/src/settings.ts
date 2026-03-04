@@ -47,9 +47,44 @@ export const THINKING_TOKEN_BUDGET: Record<ThinkingLevel, number | undefined> = 
   none: undefined, low: 1024, medium: 10000, high: 16000, ultrathink: 32000, adaptive: undefined,
 };
 
+export function getThinkingTokenBudget(level: ThinkingLevel): number | undefined {
+  return THINKING_TOKEN_BUDGET[level];
+}
+
+export function isAdaptiveThinkingModel(level?: ThinkingLevel): boolean {
+  return level === 'adaptive';
+}
+
+export function getThinkingLevelsForModel(): ThinkingLevel[] {
+  return ['none', 'low', 'medium', 'high', 'ultrathink', 'adaptive'];
+}
+
+export function normalizeThinkingLevelForModel(level?: ThinkingLevel): ThinkingLevel {
+  return level ?? 'adaptive';
+}
+
+export function getDefaultThinkingLevel(): ThinkingLevel {
+  return 'adaptive';
+}
+
 export type ApiKeySource = 'inline' | 'env' | 'credentials';
-export type ClaudeCompatibleProviderType = 'anthropic' | 'glm' | 'minimax' | 'openrouter' | 'custom';
+export type ModelProvider = 'claude' | 'codex' | 'gemini';
+export type ClaudeCompatibleProviderType = 'anthropic' | 'custom';
 export type ClaudeModelAlias = 'haiku' | 'sonnet' | 'opus';
+
+export interface ChatSessionRef {
+  id: string;
+  title?: string;
+  createdAt?: string;
+}
+
+export interface ClaudeApiProfile {
+  id: string;
+  name: string;
+  providerType?: ClaudeCompatibleProviderType;
+  model?: string;
+  enabled?: boolean;
+}
 
 export interface ProviderModel {
   id: string;
@@ -268,3 +303,5 @@ export const DEFAULT_CREDENTIALS: Credentials = {
 export const DEFAULT_PROJECT_SETTINGS: ProjectSettings = {
   version: PROJECT_SETTINGS_VERSION,
 };
+
+export const CLAUDE_PROVIDER_TEMPLATES: Array<{ name: string; providerType: ClaudeCompatibleProviderType }> = [];

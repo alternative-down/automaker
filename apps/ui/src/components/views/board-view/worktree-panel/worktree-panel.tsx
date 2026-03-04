@@ -15,6 +15,7 @@ import type {
   TestRunnerStartedEvent,
   TestRunnerOutputEvent,
   TestRunnerCompletedEvent,
+} from '@automaker/types';
 import type { WorktreePanelProps, WorktreeInfo, TestSessionInfo } from './types';
 import {
   useWorktrees,

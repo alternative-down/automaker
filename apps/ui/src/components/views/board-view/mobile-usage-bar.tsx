@@ -3,7 +3,8 @@ import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Spinner } from '@/components/ui/spinner';
 import { useAppStore } from '@/store/app-store';
-import { AnthropicIcon, OpenAIIcon, ZaiIcon, GeminiIcon } from '@/components/ui/provider-icon';
+import { AnthropicIcon, OpenAIIcon, GeminiIcon } from '@/components/ui/provider-icon';
+import { getHttpApiClient } from '@/lib/http-api-client';
 import {
   getExpectedWeeklyPacePercentage,
   getExpectedCodexPacePercentage,
@@ -13,7 +14,6 @@ import {
 interface MobileUsageBarProps {
   showClaudeUsage: boolean;
   showCodexUsage: boolean;
-  showZaiUsage?: boolean;
   showGeminiUsage?: boolean;
 }
 
@@ -24,42 +24,6 @@ function getProgressBarColor(percentage: number): string {
   return 'bg-green-500';
 }
 
-// Helper to format large numbers with K/M suffixes
-function formatNumber(num: number): string {
-  if (num >= 1_000_000_000) {
-    return `${(num / 1_000_000_000).toFixed(1)}B`;
-  }
-  if (num >= 1_000_000) {
-    return `${(num / 1_000_000).toFixed(1)}M`;
-  }
-  if (num >= 1_000) {
-    return `${(num / 1_000).toFixed(1)}K`;
-  }
-  return num.toLocaleString();
-}
-
-// Helper to format reset time
-function formatResetTime(unixTimestamp: number, isMilliseconds = false): string {
-  const date = new Date(isMilliseconds ? unixTimestamp : unixTimestamp * 1000);
-  const now = new Date();
-  const diff = date.getTime() - now.getTime();
-
-  // Handle past timestamps (negative diff)
-  if (diff <= 0) {
-    return 'Resetting soon';
-  }
-
-  if (diff < 3600000) {
-    const mins = Math.ceil(diff / 60000);
-    return `Resets in ${mins}m`;
-  }
-  if (diff < 86400000) {
-    const hours = Math.floor(diff / 3600000);
-    const mins = Math.ceil((diff % 3600000) / 60000);
-    return `Resets in ${hours}h${mins > 0 ? ` ${mins}m` : ''}`;
-  }
-  return `Resets ${date.toLocaleDateString()}`;
-}
 
 // Individual usage bar component
 function UsageBar({
@@ -185,23 +149,19 @@ function UsageItem({
 export function MobileUsageBar({
   showClaudeUsage,
   showCodexUsage,
-  showZaiUsage = false,
   showGeminiUsage = false,
 }: MobileUsageBarProps) {
   const { claudeUsage, claudeUsageLastUpdated, setClaudeUsage } = useAppStore();
   const { codexUsage, codexUsageLastUpdated, setCodexUsage } = useAppStore();
-  const { zaiUsage, zaiUsageLastUpdated, setZaiUsage } = useAppStore();
   const { geminiUsage, geminiUsageLastUpdated, setGeminiUsage } = useAppStore();
   const [isClaudeLoading, setIsClaudeLoading] = useState(false);
   const [isCodexLoading, setIsCodexLoading] = useState(false);
-  const [isZaiLoading, setIsZaiLoading] = useState(false);
   const [isGeminiLoading, setIsGeminiLoading] = useState(false);
 
   // Check if data is stale (older than 2 minutes)
   const isClaudeStale =
     !claudeUsageLastUpdated || Date.now() - claudeUsageLastUpdated > 2 * 60 * 1000;
   const isCodexStale = !codexUsageLastUpdated || Date.now() - codexUsageLastUpdated > 2 * 60 * 1000;
-  const isZaiStale = !zaiUsageLastUpdated || Date.now() - zaiUsageLastUpdated > 2 * 60 * 1000;
   const isGeminiStale =
     !geminiUsageLastUpdated || Date.now() - geminiUsageLastUpdated > 2 * 60 * 1000;
 
@@ -236,22 +196,6 @@ export function MobileUsageBar({
       setIsCodexLoading(false);
     }
   }, [setCodexUsage]);
-
-  const fetchZaiUsage = useCallback(async () => {
-    setIsZaiLoading(true);
-    try {
-      const api = getHttpApiClient();
-      if (!api.zai) return;
-      const data = await api.zai.getUsage();
-      if (!('error' in data)) {
-        setZaiUsage(data);
-      }
-    } catch {
-      // Silently fail - usage display is optional
-    } finally {
-      setIsZaiLoading(false);
-    }
-  }, [setZaiUsage]);
 
   const fetchGeminiUsage = useCallback(async () => {
     setIsGeminiLoading(true);
@@ -289,19 +233,13 @@ export function MobileUsageBar({
   }, [showCodexUsage, isCodexStale, fetchCodexUsage]);
 
   useEffect(() => {
-    if (showZaiUsage && isZaiStale) {
-      fetchZaiUsage();
-    }
-  }, [showZaiUsage, isZaiStale, fetchZaiUsage]);
-
-  useEffect(() => {
     if (showGeminiUsage && isGeminiStale) {
       fetchGeminiUsage();
     }
   }, [showGeminiUsage, isGeminiStale, fetchGeminiUsage]);
 
   // Don't render if there's nothing to show
-  if (!showClaudeUsage && !showCodexUsage && !showZaiUsage && !showGeminiUsage) {
+  if (!showClaudeUsage && !showCodexUsage && !showGeminiUsage) {
     return null;
   }
 
@@ -366,45 +304,6 @@ export function MobileUsageBar({
                 />
               )}
             </>
-          ) : (
-            <p className="text-[10px] text-muted-foreground italic">Loading usage data...</p>
-          )}
-        </UsageItem>
-      )}
-
-      {showZaiUsage && (
-        <UsageItem icon={ZaiIcon} label="z.ai" isLoading={isZaiLoading} onRefresh={fetchZaiUsage}>
-          {zaiUsage?.quotaLimits && (zaiUsage.quotaLimits.tokens || zaiUsage.quotaLimits.mcp) ? (
-            <>
-              {zaiUsage.quotaLimits.tokens && (
-                <UsageBar
-                  label="Tokens"
-                  percentage={zaiUsage.quotaLimits.tokens.usedPercent}
-                  isStale={isZaiStale}
-                  details={`${formatNumber(zaiUsage.quotaLimits.tokens.used)} / ${formatNumber(zaiUsage.quotaLimits.tokens.limit)}`}
-                  resetText={
-                    zaiUsage.quotaLimits.tokens.nextResetTime
-                      ? formatResetTime(zaiUsage.quotaLimits.tokens.nextResetTime, true)
-                      : undefined
-                  }
-                />
-              )}
-              {zaiUsage.quotaLimits.mcp && (
-                <UsageBar
-                  label="MCP"
-                  percentage={zaiUsage.quotaLimits.mcp.usedPercent}
-                  isStale={isZaiStale}
-                  details={`${formatNumber(zaiUsage.quotaLimits.mcp.used)} / ${formatNumber(zaiUsage.quotaLimits.mcp.limit)} calls`}
-                  resetText={
-                    zaiUsage.quotaLimits.mcp.nextResetTime
-                      ? formatResetTime(zaiUsage.quotaLimits.mcp.nextResetTime, true)
-                      : undefined
-                  }
-                />
-              )}
-            </>
-          ) : zaiUsage ? (
-            <p className="text-[10px] text-muted-foreground italic">No usage data from z.ai API</p>
           ) : (
             <p className="text-[10px] text-muted-foreground italic">Loading usage data...</p>
           )}

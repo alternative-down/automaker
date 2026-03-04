@@ -23,6 +23,7 @@ import { useWorktreeDiffs, useGitDiffs } from '@/hooks/queries';
 import { toast } from 'sonner';
 import { parseDiff, splitDiffByFile } from '@/lib/diff-utils';
 import type { ParsedFileDiff } from '@/lib/diff-utils';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface GitDiffPanelProps {
   projectPath: string;

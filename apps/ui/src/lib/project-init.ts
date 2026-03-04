@@ -6,6 +6,7 @@
  */
 
 import { createLogger } from '@automaker/utils/logger';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('ProjectInit');
 

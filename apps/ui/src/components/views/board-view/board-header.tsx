@@ -81,7 +81,6 @@ export function BoardHeader({
     (state) => state.setAddFeatureUseSelectedWorktreeBranch
   );
   const codexAuthStatus = useSetupStore((state) => state.codexAuthStatus);
-  const zaiAuthStatus = useSetupStore((state) => state.zaiAuthStatus);
   const geminiAuthStatus = useSetupStore((state) => state.geminiAuthStatus);
 
   // Worktree panel visibility (per-project)
@@ -113,9 +112,6 @@ export function BoardHeader({
   // Codex usage tracking visibility logic
   // Show if Codex is authenticated (CLI or API key)
   const showCodexUsage = !!codexAuthStatus?.authenticated;
-
-  // z.ai usage tracking visibility logic
-  const showZaiUsage = !!zaiAuthStatus?.authenticated;
 
   // Gemini usage tracking visibility logic
   const showGeminiUsage = !!geminiAuthStatus?.authenticated;
@@ -169,7 +165,7 @@ export function BoardHeader({
         {/* Usage Popover - show if any provider is authenticated, only on desktop */}
         {isMounted &&
           !isTablet &&
-          (showClaudeUsage || showCodexUsage || showZaiUsage || showGeminiUsage) && (
+          (showClaudeUsage || showCodexUsage || showGeminiUsage) && (
             <UsagePopover />
           )}
 
@@ -190,7 +186,6 @@ export function BoardHeader({
             onOpenPlanDialog={onOpenPlanDialog}
             showClaudeUsage={showClaudeUsage}
             showCodexUsage={showCodexUsage}
-            showZaiUsage={showZaiUsage}
             showGeminiUsage={showGeminiUsage}
           />
         )}

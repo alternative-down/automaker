@@ -21,6 +21,7 @@ import {
   isAdditiveMode,
 } from './enhancement-constants';
 import { useAppStore } from '@/store/app-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('EnhanceWithAI');
 

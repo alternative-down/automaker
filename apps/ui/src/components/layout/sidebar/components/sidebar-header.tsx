@@ -6,7 +6,7 @@ import type { LucideIcon } from 'lucide-react';
 import { cn, isMac } from '@/lib/utils';
 import { formatShortcut } from '@/store/app-store';
 import { initializeProject } from '@/lib/project-init';
-import { MACOS_ELECTRON_TOP_PADDING_CLASS } from '../constants';
+import { MACOS_TOP_PADDING_CLASS } from '../constants';
 import { getAuthenticatedImageUrl } from '@/lib/api-fetch';
 import { useAppStore } from '@/store/app-store';
 import {
@@ -110,7 +110,7 @@ export function SidebarHeader({
       <div
         className={cn(
           'shrink-0 flex flex-col items-center relative px-2 pt-3 pb-2',
-          isMac && false && MACOS_ELECTRON_TOP_PADDING_CLASS
+          isMac && false && MACOS_TOP_PADDING_CLASS
         )}
       >
         <Tooltip>
@@ -277,7 +277,7 @@ export function SidebarHeader({
     <div
       className={cn(
         'shrink-0 flex flex-col relative px-3 pt-3 pb-2',
-        isMac && false && MACOS_ELECTRON_TOP_PADDING_CLASS
+        isMac && false && MACOS_TOP_PADDING_CLASS
       )}
     >
       {/* Header with logo and project dropdown */}

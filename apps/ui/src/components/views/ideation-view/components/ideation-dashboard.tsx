@@ -15,6 +15,7 @@ import { useAppStore } from '@/store/app-store';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { AnalysisSuggestion } from '@automaker/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 // Helper for consistent pluralization of "idea/ideas"
 const pluralizeIdea = (count: number) => `idea${count !== 1 ? 's' : ''}`;

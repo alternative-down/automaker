@@ -13,11 +13,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { pathsEqual } from '@/lib/utils';
+import { getHttpApiClient } from '@/lib/http-api-client';
 import type {
   TestRunStatus,
   TestRunnerStartedEvent,
   TestRunnerOutputEvent,
   TestRunnerCompletedEvent,
+} from '@automaker/types';
 
 const logger = createLogger('TestLogs');
 

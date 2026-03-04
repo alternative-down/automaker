@@ -122,3 +122,8 @@ export const useAppStore = create<AppState & AppActions>()((set, get) => ({
   // Ações simplificadas para o Fork
   reset: () => set(initialState),
 }));
+
+// Re-exports for compatibility
+export * from './types';
+export * from './utils';
+export { defaultBackgroundSettings } from './defaults';

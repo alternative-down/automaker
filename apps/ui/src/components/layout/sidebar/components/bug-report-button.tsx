@@ -1,6 +1,7 @@
 import { Bug } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface BugReportButtonProps {
   sidebarExpanded: boolean;

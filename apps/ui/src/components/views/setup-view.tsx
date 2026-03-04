@@ -28,7 +28,6 @@ export function SetupView() {
     if (
       currentStep === 'claude_detect' ||
       currentStep === 'claude_auth' ||
-      currentStep === 'cursor' ||
       currentStep === 'codex' ||
       currentStep === 'providers'
     ) {
@@ -118,8 +117,7 @@ export function SetupView() {
             {(currentStep === 'providers' ||
               currentStep === 'claude_detect' ||
               currentStep === 'claude_auth' ||
-              currentStep === 'cursor' ||
-              currentStep === 'codex' ||
+              currentStep === 'codex') && (
               <ProvidersSetupStep
                 onNext={() => handleNext('providers')}
                 onBack={() => handleBack('providers')}

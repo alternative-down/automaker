@@ -12,6 +12,7 @@ import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 import { createSmartPollingInterval, getGlobalEventsRecent } from '@/hooks/use-event-recency';
 import type { Feature } from '@/store/app-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const FEATURES_REFETCH_ON_FOCUS = false;
 const FEATURES_REFETCH_ON_RECONNECT = false;

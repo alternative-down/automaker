@@ -121,7 +121,7 @@ export function pathsEqual(p1: string | undefined | null, p2: string | undefined
 
 /**
  * Detect if running on macOS.
- * Checks Electron process.platform first, then falls back to navigator APIs.
+ * Checks runtime platform first, then falls back to navigator APIs.
  */
 export const isMac =
   typeof process !== 'undefined' && process.platform === 'darwin'

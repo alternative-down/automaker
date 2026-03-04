@@ -135,3 +135,11 @@ export function useTestRunners(worktreePath?: string) {
     removeSession,
   };
 }
+
+export function useTestRunnerEvents() {
+  return {
+    onStarted: (_cb?: (event: any) => void) => () => {},
+    onOutput: (_cb?: (event: any) => void) => () => {},
+    onCompleted: (_cb?: (event: any) => void) => () => {},
+  };
+}

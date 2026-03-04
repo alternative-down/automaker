@@ -6,6 +6,7 @@
 import { createLogger } from '@automaker/utils/logger';
 import { getHttpApiClient } from './http-api-client';
 import { useAppStore } from '@/store/app-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('WorkspaceConfig');
 
@@ -32,13 +33,15 @@ function joinPath(...parts: string[]): string {
  */
 async function getDefaultDocumentsPath(): Promise<string | null> {
   try {
-    // In Electron mode, use the native getPath API directly from the preload script
-    // This returns the actual system Documents folder (e.g., C:\Users\<user>\Documents on Windows)
-    // Note: The HTTP client's getPath returns incorrect Unix-style paths for 'documents'
+    // Try resolving the user documents path from workspace API
+    const api = getHttpApiClient();
+    const documentsResult = await api.workspace.getPath?.('documents');
+    const documentsPath = (documentsResult as any)?.path as string | undefined;
+    if (documentsPath) {
       return joinPath(documentsPath, 'Automaker');
     }
 
-    // In web mode (no Electron), we can't access the user's Documents folder
+    // In web mode (without desktop bridge), we can't always access the user's Documents folder
     // Return null to let the caller use other fallback mechanisms (like server's DATA_DIR)
     return null;
   } catch (error) {

@@ -9,6 +9,7 @@ import { Check, Circle, ChevronDown, ChevronRight, FileCode } from 'lucide-react
 import { Spinner } from '@/components/ui/spinner';
 import type { Feature, ParsedTask } from '@automaker/types';
 import { Badge } from '@/components/ui/badge';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface TaskInfo {
   id: string;

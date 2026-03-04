@@ -245,7 +245,7 @@ export function OverviewView() {
     <div className="flex-1 flex flex-col h-full content-bg" data-testid="overview-view">
       {/* Header */}
       <header className="shrink-0 border-b border-border bg-glass backdrop-blur-md">
-        {/* Electron titlebar drag region */}
+        {/* App titlebar drag region */}
         {false && (
           <div
             className={`absolute top-0 left-0 right-0 h-6 titlebar-drag-region z-40 pointer-events-none ${isMac ? 'pl-20' : ''}`}

@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 import { createSmartPollingInterval } from '@/hooks/use-event-recency';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const RUNNING_AGENTS_REFETCH_ON_FOCUS = false;
 const RUNNING_AGENTS_REFETCH_ON_RECONNECT = false;

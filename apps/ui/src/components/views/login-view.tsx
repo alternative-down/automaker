@@ -113,7 +113,7 @@ const NO_STORE_CACHE_MODE: RequestCache = 'no-store';
  * which would navigate us away to /logged-out.
  *
  * Supports both:
- * - Electron mode: Uses X-API-Key header (API key from IPC)
+ * - Desktop mode: Uses X-API-Key header (API key from bridge)
  * - Web mode: Uses HTTP-only session cookie
  *
  * Returns: { authenticated: true } or { authenticated: false }
@@ -130,7 +130,7 @@ async function checkAuthStatusSafe(): Promise<{ authenticated: boolean }> {
     'Content-Type': 'application/json',
   };
 
-  // Electron mode: use API key header
+  // Desktop mode: use API key header
   const apiKey = getApiKey();
   if (apiKey) {
     headers['X-API-Key'] = apiKey;

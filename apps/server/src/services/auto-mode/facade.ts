@@ -224,7 +224,7 @@ export class AutoModeServiceFacade {
         const provider = ProviderFactory.getProviderForModel(resolvedModel);
         const effectiveBareModel = stripProviderPrefix(resolvedModel);
 
-        // Resolve custom provider (GLM, MiniMax, etc.) for baseUrl and credentials
+        // Resolve custom provider for baseUrl and credentials
         let claudeCompatibleProvider:
           | import('@automaker/types').ClaudeCompatibleProvider
           | undefined;

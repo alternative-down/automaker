@@ -168,7 +168,7 @@ export function WikiView() {
           <ul className="list-disc list-inside space-y-2 ml-2">
             <li>
               <strong className="text-foreground">apps/ui</strong> - React + TanStack Router +
-              Electron frontend for the desktop application
+              Web frontend for the desktop application
             </li>
             <li>
               <strong className="text-foreground">apps/server</strong> - Express backend handling
@@ -182,7 +182,7 @@ export function WikiView() {
           <div className="mt-4 space-y-2">
             <p className="font-medium text-foreground">Key Technologies:</p>
             <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>Electron + React + TanStack Router for cross-platform desktop support</li>
+              <li>React + TanStack Router for cross-platform desktop support</li>
               <li>Real-time communication via WebSocket for live agent updates</li>
               <li>State management with Zustand for reactive UI updates</li>
               <li>Claude Agent SDK for AI capabilities</li>
@@ -338,7 +338,7 @@ export function WikiView() {
           <CodeBlock title="Directory Structure">
             {`automaker/
 ├─ apps/
-│  ├─ ui/                                    Frontend (React + Electron)
+│  ├─ ui/                                    Frontend (React + Web)
 │  │  └─ src/
 │  │     ├─ routes/                          TanStack Router pages
 │  │     ├─ components/
@@ -354,8 +354,8 @@ export function WikiView() {
 │  │     ├─ styles/                          CSS styles and theme definitions
 │  │     ├─ types/                           TypeScript type definitions
 │  │     ├─ utils/                           Utility functions
-│  │     ├─ main.ts                          Electron main process entry
-│  │     ├─ preload.ts                       Electron preload script
+│  │     ├─ main.ts                          Desktop main process entry
+│  │     ├─ preload.ts                       Desktop preload script
 │  │     └─ renderer.tsx                     React renderer entry
 │  │
 │  └─ server/                                Backend (Express)

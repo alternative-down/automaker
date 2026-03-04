@@ -20,6 +20,7 @@ import { starterTemplates, type StarterTemplate } from '@/lib/templates';
 import { cn } from '@/lib/utils';
 import { useFileBrowser } from '@/contexts/file-browser-context';
 import { getDefaultWorkspaceDirectory, saveLastProjectDirectory } from '@/lib/workspace-config';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('NewProjectModal');
 
@@ -190,6 +191,7 @@ export function NewProjectModal({
 
   // Use platform-specific path separator
   const pathSep =
+    typeof navigator !== 'undefined'
       ? navigator.platform.indexOf('Win') !== -1
         ? '\\'
         : '/'

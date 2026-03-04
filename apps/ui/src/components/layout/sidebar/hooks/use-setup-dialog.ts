@@ -4,6 +4,7 @@ import { createLogger } from '@automaker/utils/logger';
 const logger = createLogger('SetupDialog');
 import { toast } from 'sonner';
 import type { FeatureCount } from '@/components/views/spec-view/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface UseSetupDialogProps {
   setSpecCreatingForProject: (path: string | null) => void;

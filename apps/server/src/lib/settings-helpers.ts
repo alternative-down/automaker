@@ -695,9 +695,9 @@ export interface ProviderByModelIdResult {
  * This is useful when you have a model string from the UI but need the provider config.
  *
  * Also resolves the `mapsToClaudeModel` field to get the actual Claude model ID to use
- * when calling the API (e.g., "GLM-4.5-Air" -> "claude-haiku-4-5").
+ * when calling the API.
  *
- * @param modelId - The model ID to search for (e.g., "GLM-4.7", "MiniMax-M2.1")
+ * @param modelId - The model ID to search for
  * @param settingsService - Settings service instance
  * @param logPrefix - Prefix for log messages
  * @returns Promise resolving to object with provider, model config, credentials, and resolved model

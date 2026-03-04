@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { STALE_TIMES } from '@/lib/query-client';
 import { getGlobalEventsRecent } from '@/hooks/use-event-recency';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface SpecFileResult {
   content: string;

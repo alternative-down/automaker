@@ -217,7 +217,7 @@ export class IdeationService {
       // Resolve model alias to canonical identifier (with prefix)
       let modelId = resolveModelString(options?.model ?? 'sonnet');
 
-      // Try to find a provider for this model (e.g., GLM, MiniMax models)
+      // Try to find a provider for this model
       let claudeCompatibleProvider: import('@automaker/types').ClaudeCompatibleProvider | undefined;
       let credentials = await this.settingsService?.getCredentials();
 
@@ -229,7 +229,7 @@ export class IdeationService {
         );
         if (providerResult.provider) {
           claudeCompatibleProvider = providerResult.provider;
-          // CRITICAL: For custom providers, use the provider's model ID (e.g. "GLM-4.7")
+          // CRITICAL: For custom providers, use the provider's model ID
           // for the API call, NOT the resolved Claude model - otherwise we get "model not found"
           modelId = options.model;
           credentials = providerResult.credentials ?? credentials;

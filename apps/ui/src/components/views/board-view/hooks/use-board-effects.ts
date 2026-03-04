@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import type { Feature } from '@/store/app-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('BoardEffects');
 

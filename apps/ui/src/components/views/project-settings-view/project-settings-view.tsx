@@ -74,7 +74,7 @@ export function ProjectSettingsView() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const convertProject = (project: ElectronProject | null): SettingsProject | null => {
+  const convertProject = (project: SettingsProject | null): SettingsProject | null => {
     if (!project) return null;
     return {
       id: project.id,

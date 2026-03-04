@@ -407,7 +407,7 @@ export function CommitWorktreeDialog({
 
   /** Shared push helper — returns true if the push succeeded */
   const performPush = async (
-    api: ReturnType<typeof getElectronAPI>,
+    api: ReturnType<typeof getHttpApiClient>,
     worktreePath: string,
     remoteName: string
   ): Promise<boolean> => {

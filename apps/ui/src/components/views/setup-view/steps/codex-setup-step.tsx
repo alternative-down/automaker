@@ -1,8 +1,9 @@
-// @ts-nocheck - Codex setup wizard with Electron API integration
+// @ts-nocheck - Codex setup wizard with web API integration
 import { useMemo, useCallback } from 'react';
 import { useSetupStore } from '@/store/setup-store';
 import { CliSetupStep } from './cli-setup-step';
 import type { CodexAuthStatus } from '@/store/setup-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface CodexSetupStepProps {
   onNext: () => void;
@@ -19,21 +20,20 @@ export function CodexSetupStep({ onNext, onBack, onSkip }: CodexSetupStepProps) 
     setCodexInstallProgress,
   } = useSetupStore();
 
-  const statusApi = useCallback(
-    () => .setup?.getCodexStatus() || Promise.reject(),
-    []
-  );
+  const statusApi = useCallback(() => {
+    const api = getHttpApiClient();
+    return api.setup?.getCodexStatus() || Promise.reject();
+  }, []);
 
-  const installApi = useCallback(
-    () => .setup?.installCodex() || Promise.reject(),
-    []
-  );
+  const installApi = useCallback(() => {
+    const api = getHttpApiClient();
+    return api.setup?.installCodex() || Promise.reject();
+  }, []);
 
-  const verifyAuthApi = useCallback(
-    (method: 'cli' | 'api_key', apiKey?: string) =>
-      .setup?.verifyCodexAuth(method, apiKey) || Promise.reject(),
-    []
-  );
+  const verifyAuthApi = useCallback((method: 'cli' | 'api_key', apiKey?: string) => {
+    const api = getHttpApiClient();
+    return api.setup?.verifyCodexAuth(method, apiKey) || Promise.reject();
+  }, []);
 
   const config = useMemo(
     () => ({

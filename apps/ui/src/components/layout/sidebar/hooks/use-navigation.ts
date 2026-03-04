@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import type { NavSection, NavItem } from '../types';
 import type { KeyboardShortcut } from '@/hooks/use-keyboard-shortcuts';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface UseNavigationProps {
   shortcuts: {

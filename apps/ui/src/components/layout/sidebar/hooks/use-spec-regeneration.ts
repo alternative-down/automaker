@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { toast } from 'sonner';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('SpecRegeneration');
 

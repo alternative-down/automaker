@@ -7,6 +7,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface UpdateGlobalSettingsOptions {
   /** Show success toast (default: true) */

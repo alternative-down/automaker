@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { createLogger } from '@automaker/utils/logger';
 import { useFeatures } from '@/hooks/queries';
 import { queryKeys } from '@/lib/query-keys';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('BoardFeatures');
 

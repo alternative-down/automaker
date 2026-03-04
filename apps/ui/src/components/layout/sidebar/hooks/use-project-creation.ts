@@ -5,6 +5,7 @@ const logger = createLogger('ProjectCreation');
 import { initializeProject } from '@/lib/project-init';
 import { toast } from 'sonner';
 import type { StarterTemplate } from '@/lib/templates';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface UseProjectCreationProps {
   upsertAndSetCurrentProject: (path: string, name: string) => Project;

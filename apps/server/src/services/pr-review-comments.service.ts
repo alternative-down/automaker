@@ -6,12 +6,9 @@
  * so the route only deals with request/response plumbing.
  */
 
-import { spawn, execFile } from 'child_process';
-import { promisify } from 'util';
+import { spawnProcess } from '@automaker/platform';
 import { createLogger } from '@automaker/utils';
-import { execEnv, logError } from '../lib/exec-utils.js';
-
-const execFileAsync = promisify(execFile);
+import { logError } from '../lib/exec-utils.js';
 
 // ── Public types (re-exported for callers) ──
 
@@ -104,53 +101,30 @@ const logger = createLogger('PRReviewCommentsService');
  * Execute a GraphQL query via the `gh` CLI and return the parsed response.
  */
 async function executeGraphQL(projectPath: string, requestBody: string): Promise<GraphQLResponse> {
-  let timeoutId: NodeJS.Timeout | undefined;
-
-  const response = await new Promise<GraphQLResponse>((resolve, reject) => {
-    const gh = spawn('gh', ['api', 'graphql', '--input', '-'], {
+  try {
+    const { stdout, exitCode, stderr } = await spawnProcess({
+      command: 'gh',
+      args: ['api', 'graphql', '--input', '-'],
       cwd: projectPath,
-      env: execEnv,
+      input: requestBody,
+      timeout: GITHUB_API_TIMEOUT_MS,
     });
 
-    gh.on('error', (err) => {
-      clearTimeout(timeoutId);
-      reject(err);
-    });
+    if (exitCode !== 0) {
+      throw new Error(`gh process exited with code ${exitCode}: ${stderr}`);
+    }
 
-    timeoutId = setTimeout(() => {
-      gh.kill();
-      reject(new Error('GitHub GraphQL API request timed out'));
-    }, GITHUB_API_TIMEOUT_MS);
-
-    let stdout = '';
-    let stderr = '';
-    gh.stdout.on('data', (data: Buffer) => (stdout += data.toString()));
-    gh.stderr.on('data', (data: Buffer) => (stderr += data.toString()));
-
-    gh.on('close', (code) => {
-      clearTimeout(timeoutId);
-      if (code !== 0) {
-        return reject(new Error(`gh process exited with code ${code}: ${stderr}`));
-      }
-      try {
-        resolve(JSON.parse(stdout));
-      } catch (e) {
-        reject(e);
-      }
-    });
-
-    gh.stdin.on('error', () => {
-      // Ignore stdin errors (e.g. when the child process is killed)
-    });
-    gh.stdin.write(requestBody);
-    gh.stdin.end();
-  });
-
-  if (response.errors && response.errors.length > 0) {
-    throw new Error(response.errors[0].message);
+    const response = JSON.parse(stdout);
+    if (response.errors && response.errors.length > 0) {
+      throw new Error(response.errors[0].message);
+    }
+    return response;
+  } catch (error: any) {
+    if (error.message && error.message.includes('timed out')) {
+      throw new Error('GitHub GraphQL API request timed out');
+    }
+    throw error;
   }
-
-  return response;
 }
 
 /**
@@ -269,16 +243,17 @@ export async function fetchPRReviewComments(
   // null, causing bot comments to be silently dropped or display as "unknown".
   try {
     const issueCommentsEndpoint = `repos/${owner}/${repo}/issues/${prNumber}/comments`;
-    const { stdout: commentsOutput } = await execFileAsync(
-      'gh',
-      ['api', issueCommentsEndpoint, '--paginate'],
-      {
-        cwd: projectPath,
-        env: execEnv,
-        maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large PRs
-        timeout: GITHUB_API_TIMEOUT_MS,
-      }
-    );
+    const { stdout: commentsOutput, exitCode, stderr } = await spawnProcess({
+      command: 'gh',
+      args: ['api', issueCommentsEndpoint, '--paginate'],
+      cwd: projectPath,
+      timeout: GITHUB_API_TIMEOUT_MS,
+      maxBuffer: 1024 * 1024 * 10,
+    });
+
+    if (exitCode !== 0) {
+      throw new Error(`Failed to fetch comments: ${stderr}`);
+    }
 
     const commentsData = JSON.parse(commentsOutput);
     const regularComments = (Array.isArray(commentsData) ? commentsData : []).map(
@@ -312,16 +287,17 @@ export async function fetchPRReviewComments(
   // 2. Fetch inline review comments (code-level comments with file/line info)
   try {
     const reviewsEndpoint = `repos/${owner}/${repo}/pulls/${prNumber}/comments`;
-    const { stdout: reviewsOutput } = await execFileAsync(
-      'gh',
-      ['api', reviewsEndpoint, '--paginate'],
-      {
-        cwd: projectPath,
-        env: execEnv,
-        maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large PRs
-        timeout: GITHUB_API_TIMEOUT_MS,
-      }
-    );
+    const { stdout: reviewsOutput, exitCode, stderr } = await spawnProcess({
+      command: 'gh',
+      args: ['api', reviewsEndpoint, '--paginate'],
+      cwd: projectPath,
+      timeout: GITHUB_API_TIMEOUT_MS,
+      maxBuffer: 1024 * 1024 * 10,
+    });
+
+    if (exitCode !== 0) {
+      throw new Error(`Failed to fetch reviews: ${stderr}`);
+    }
 
     const reviewsData = JSON.parse(reviewsOutput);
     const reviewComments = (Array.isArray(reviewsData) ? reviewsData : []).map(
@@ -371,16 +347,17 @@ export async function fetchPRReviewComments(
   // and issue-level comments. Only include reviews that have a non-empty body.
   try {
     const reviewsEndpoint = `repos/${owner}/${repo}/pulls/${prNumber}/reviews`;
-    const { stdout: reviewBodiesOutput } = await execFileAsync(
-      'gh',
-      ['api', reviewsEndpoint, '--paginate'],
-      {
-        cwd: projectPath,
-        env: execEnv,
-        maxBuffer: 1024 * 1024 * 10, // 10MB buffer for large PRs
-        timeout: GITHUB_API_TIMEOUT_MS,
-      }
-    );
+    const { stdout: reviewBodiesOutput, exitCode, stderr } = await spawnProcess({
+      command: 'gh',
+      args: ['api', reviewsEndpoint, '--paginate'],
+      cwd: projectPath,
+      timeout: GITHUB_API_TIMEOUT_MS,
+      maxBuffer: 1024 * 1024 * 10,
+    });
+
+    if (exitCode !== 0) {
+      throw new Error(`Failed to fetch review bodies: ${stderr}`);
+    }
 
     const reviewBodiesData = JSON.parse(reviewBodiesOutput);
     const reviewBodyComments = (Array.isArray(reviewBodiesData) ? reviewBodiesData : [])

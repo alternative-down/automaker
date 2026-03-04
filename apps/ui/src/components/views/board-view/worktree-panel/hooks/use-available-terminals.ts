@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createLogger } from '@automaker/utils/logger';
 import { useAppStore } from '@/store/app-store';
 import type { TerminalInfo } from '@automaker/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 const logger = createLogger('AvailableTerminals');
 

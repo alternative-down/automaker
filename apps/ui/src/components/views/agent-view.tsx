@@ -9,6 +9,7 @@ import {
   useAgentShortcuts,
   useAgentSession,
 } from './agent-view/hooks';
+import { useAgent } from '@/hooks/use-agent';
 
 // Extracted components
 import { NoProjectState, AgentHeader, ChatArea } from './agent-view/components';
@@ -60,7 +61,7 @@ export function AgentView() {
       workingDirectory: effectiveWorkingDirectory,
     });
 
-  // Use the Electron agent hook (only if we have a session)
+  // Use the agent hook (only if we have a session)
   const {
     messages,
     isProcessing,
@@ -72,7 +73,7 @@ export function AgentView() {
     addToServerQueue,
     removeFromServerQueue,
     clearServerQueue,
-  } = useElectronAgent({
+  } = useAgent({
     sessionId: currentSessionId || '',
     workingDirectory: effectiveWorkingDirectory,
     model: modelSelection.model,

@@ -331,7 +331,7 @@ export function KanbanBoard({
   const addFeatureShortcut = addFeatureShortcutProp || keyboardShortcuts.addFeature || 'N';
 
   // Use responsive column widths based on window size
-  // containerStyle handles centering and ensures columns fit without horizontal scroll in Electron
+  // containerStyle handles centering and ensures columns fit without horizontal scroll in desktop mode
   const { columnWidth, containerStyle } = useResponsiveKanban(columns.length);
 
   return (

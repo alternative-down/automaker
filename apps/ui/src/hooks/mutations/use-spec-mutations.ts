@@ -8,6 +8,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { FeatureCount } from '@/components/views/spec-view/types';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Input for creating a spec

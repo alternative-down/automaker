@@ -9,6 +9,7 @@ import { queryKeys } from '@/lib/query-keys';
 import { toast } from 'sonner';
 import type { IdeaCategory, AnalysisSuggestion } from '@automaker/types';
 import { useIdeationStore } from '@/store/ideation-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 /**
  * Input for generating ideation suggestions

@@ -862,7 +862,7 @@
   box-sizing: border-box;
 }
 
-/* Electron title bar drag region */
+/* App title bar drag region */
 .titlebar-drag-region {
   -webkit-app-region: drag;
 }

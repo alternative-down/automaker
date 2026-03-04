@@ -1,10 +1,10 @@
 import { darkThemes, lightThemes } from '@/config/theme-options';
 
 /**
- * Tailwind class for top padding on macOS Electron to avoid overlapping with traffic light window controls.
- * This padding is applied conditionally when running on macOS in Electron.
+ * Tailwind class for top padding on macOS desktop to avoid overlapping with traffic light window controls.
+ * This padding is applied conditionally when running on macOS desktop.
  */
-export const MACOS_ELECTRON_TOP_PADDING_CLASS = 'pt-[38px]';
+export const MACOS_TOP_PADDING_CLASS = 'pt-[38px]';
 
 /**
  * Shared constants for theme submenu positioning and layout.

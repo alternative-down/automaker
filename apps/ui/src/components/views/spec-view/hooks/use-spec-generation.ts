@@ -9,6 +9,7 @@ import { createElement } from 'react';
 import { SPEC_FILE_WRITE_DELAY, STATUS_CHECK_INTERVAL_MS } from '../constants';
 import type { FeatureCount } from '../types';
 import { useCreateSpec, useRegenerateSpec, useGenerateFeatures } from '@/hooks/mutations';
+import { getHttpApiClient } from '@/lib/http-api-client';
 
 interface UseSpecGenerationOptions {
   loadSpec: () => Promise<void>;

@@ -8,6 +8,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { getAuthenticatedImageUrl } from '@/lib/api-fetch';
 import { useAppStore, type FeatureImagePath, type FeatureTextFilePath } from '@/store/app-store';
+import { getHttpApiClient } from '@/lib/http-api-client';
 import {
   sanitizeFilename,
   fileToBase64,
