@@ -52,6 +52,8 @@ const getServerUrl = (): string => {
   if (typeof window !== 'undefined') {
     const envUrl = import.meta.env.VITE_SERVER_URL;
     if (envUrl) return envUrl;
+    // In deployed web mode, default to same-origin so Vite preview/nginx proxy can route /api.
+    return window.location.origin;
   }
   const hostname = import.meta.env.VITE_HOSTNAME || 'localhost';
   return `http://${hostname}:3008`;
