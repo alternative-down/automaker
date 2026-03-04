@@ -319,13 +319,13 @@ export function FileBrowserDialog({
               </div>
             )}
 
-            {!loading && !error && !warning && directories.length === 0 && (
+            {!loading && !error && !warning && safeDirectories.length === 0 && (
               <div className="flex items-center justify-center h-full p-4">
                 <div className="text-xs text-muted-foreground">No subdirectories found</div>
               </div>
             )}
 
-            {!loading && !error && directories.length > 0 && (
+            {!loading && !error && safeDirectories.length > 0 && (
               <div className="divide-y divide-sidebar-border">
                 {safeDirectories.map((dir) => (
                   <button
