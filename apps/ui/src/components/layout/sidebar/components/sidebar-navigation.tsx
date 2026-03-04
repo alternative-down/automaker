@@ -46,7 +46,11 @@ export function SidebarNavigation({
   const navRef = useRef<HTMLElement>(null);
 
   // Get collapsed state from store (persisted across restarts)
-  const { collapsedNavSections, setCollapsedNavSections, toggleNavSection } = useAppStore();
+  const collapsedNavSections = useAppStore((s: any) => s.collapsedNavSections || {});
+  const setCollapsedNavSections = useAppStore(
+    (s: any) => s.setCollapsedNavSections || ((_next: Record<string, boolean>) => {})
+  );
+  const toggleNavSection = useAppStore((s: any) => s.toggleNavSection || ((_label: string) => {}));
 
   // Initialize collapsed state when sections change (e.g., GitHub section appears)
   // Only set defaults for sections that don't have a persisted state

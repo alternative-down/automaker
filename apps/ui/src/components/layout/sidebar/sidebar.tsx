@@ -48,28 +48,29 @@ export function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const {
-    projects,
-    trashedProjects,
-    currentProject,
-    sidebarOpen,
-    sidebarStyle,
-    mobileSidebarHidden,
-    projectHistory,
-    upsertAndSetCurrentProject,
-    toggleSidebar,
-    toggleMobileSidebarHidden,
-    restoreTrashedProject,
-    deleteTrashedProject,
-    emptyTrash,
-    cyclePrevProject,
-    cycleNextProject,
-    moveProjectToTrash,
-    removeProject,
-    specCreatingForProject,
-    setSpecCreatingForProject,
-    setCurrentProject,
-  } = useAppStore();
+  const store: any = useAppStore();
+  const projects = store.projects;
+  const trashedProjects = store.trashedProjects;
+  const currentProject = store.currentProject;
+  const sidebarOpen = store.sidebarOpen;
+  const sidebarStyle = store.sidebarStyle;
+  const mobileSidebarHidden = store.mobileSidebarHidden ?? false;
+  const projectHistory = store.projectHistory || [];
+  const upsertAndSetCurrentProject =
+    store.upsertAndSetCurrentProject || ((_project: any) => {});
+  const toggleSidebar = store.toggleSidebar || (() => {});
+  const toggleMobileSidebarHidden = store.toggleMobileSidebarHidden || (() => {});
+  const restoreTrashedProject = store.restoreTrashedProject || ((_project: any) => {});
+  const deleteTrashedProject = store.deleteTrashedProject || ((_projectId: string) => {});
+  const emptyTrash = store.emptyTrash || (() => {});
+  const cyclePrevProject = store.cyclePrevProject || (() => {});
+  const cycleNextProject = store.cycleNextProject || (() => {});
+  const moveProjectToTrash = store.moveProjectToTrash || ((_projectId: string) => {});
+  const removeProject = store.removeProject || ((_projectId: string) => {});
+  const specCreatingForProject = store.specCreatingForProject || null;
+  const setSpecCreatingForProject =
+    store.setSpecCreatingForProject || ((_projectId: string | null) => {});
+  const setCurrentProject = store.setCurrentProject || ((_project: any) => {});
 
   const isCompact = useIsCompact();
 
